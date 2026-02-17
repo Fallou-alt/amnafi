@@ -1,0 +1,35 @@
+# Backend Laravel
+backend_amnafi/vendor/
+backend_amnafi/node_modules/
+backend_amnafi/.env
+backend_amnafi/storage/*.key
+backend_amnafi/storage/logs/
+backend_amnafi/storage/framework/cache/
+backend_amnafi/storage/framework/sessions/
+backend_amnafi/storage/framework/views/
+backend_amnafi/bootstrap/cache/
+backend_amnafi/public/storage
+backend_amnafi/.phpunit.result.cache
+backend_amnafi/composer.lock
+
+# Frontend Next.js
+front_amnafi/node_modules/
+front_amnafi/.next/
+front_amnafi/out/
+front_amnafi/.env.local
+front_amnafi/.env.development.local
+front_amnafi/.env.test.local
+front_amnafi/.env.production.local
+front_amnafi/.vercel
+front_amnafi/package-lock.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
