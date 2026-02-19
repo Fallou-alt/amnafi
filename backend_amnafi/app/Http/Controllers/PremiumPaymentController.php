@@ -95,6 +95,7 @@ class PremiumPaymentController extends Controller
                 // Activer l'abonnement pour le prestataire
                 $payment->provider->update([
                     'is_premium' => $subscriptionType === 'premium',
+                    'is_verified' => true,
                     'subscription_type' => $subscriptionType,
                     'subscription_started_at' => now(),
                     'subscription_expires_at' => now()->addMonths($payment->duration_months),
@@ -160,6 +161,7 @@ class PremiumPaymentController extends Controller
 
             $payment->provider->update([
                 'is_premium' => $subscriptionType === 'premium',
+                'is_verified' => true,
                 'subscription_type' => $subscriptionType,
                 'subscription_started_at' => now(),
                 'subscription_expires_at' => now()->addMonths($payment->duration_months),

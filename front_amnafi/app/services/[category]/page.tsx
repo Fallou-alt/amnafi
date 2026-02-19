@@ -156,15 +156,24 @@ export default function CategoryProviders() {
                     <span className="text-sm font-medium">{parseFloat(provider.rating).toFixed(1)}</span>
                     <span className="text-sm text-gray-500">({provider.reviews_count})</span>
                   </div>
-                  <a
-                    href={provider.whatsapp_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700 flex items-center space-x-2"
-                  >
-                    <MessageCircle className="w-4 h-4" />
-                    <span>WhatsApp</span>
-                  </a>
+                  <div className="flex items-center gap-2">
+                    <a
+                      href={`tel:${provider.phone}`}
+                      className="bg-orange-600 text-white p-2 rounded-lg hover:bg-orange-700 transition-colors"
+                      title="Appeler"
+                    >
+                      <Phone className="w-4 h-4" />
+                    </a>
+                    <a
+                      href={provider.whatsapp_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="bg-red-600 text-white p-2 rounded-lg hover:bg-red-700 transition-colors"
+                      title="WhatsApp"
+                    >
+                      <MessageCircle className="w-4 h-4" />
+                    </a>
+                  </div>
                 </div>
               </div>
             ))}

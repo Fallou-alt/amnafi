@@ -141,6 +141,17 @@ Route::middleware('auth:sanctum')->prefix('protected')->group(function () {
     Route::apiResource('reviews', App\Http\Controllers\Api\ReviewController::class)->only(['store', 'update', 'destroy']);
 });
 
+// Routes Profil Utilisateur
+Route::middleware('auth:sanctum')->prefix('profile')->group(function () {
+    Route::get('/', [App\Http\Controllers\Api\ProfileController::class, 'show']);
+    Route::put('/', [App\Http\Controllers\Api\ProfileController::class, 'update']);
+    Route::put('/password', [App\Http\Controllers\Api\ProfileController::class, 'updatePassword']);
+    Route::post('/photo', [App\Http\Controllers\Api\ProfileController::class, 'updatePhoto']);
+    Route::delete('/photo', [App\Http\Controllers\Api\ProfileController::class, 'deletePhoto']);
+    Route::put('/geolocation', [App\Http\Controllers\Api\ProfileController::class, 'updateGeolocation']);
+    Route::delete('/', [App\Http\Controllers\Api\ProfileController::class, 'destroy']);
+});
+
 // Route de test pour la connexion frontend
 Route::get('/test', function () {
     return response()->json([

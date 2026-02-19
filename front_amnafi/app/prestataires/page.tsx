@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Star, MapPin, Phone, Crown, ArrowLeft, Search, MessageCircle } from 'lucide-react';
+import { Star, MapPin, Phone, Crown, ArrowLeft, Search, MessageCircle, CheckCircle } from 'lucide-react';
 
 interface Provider {
   id: number;
@@ -16,6 +16,7 @@ interface Provider {
   is_verified: boolean;
   is_premium: boolean;
   profile_photo: string;
+  cover_photo: string;
   profile_photo_url: string;
   whatsapp_url: string;
   user: {
@@ -171,68 +172,103 @@ export default function AllProviders() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {providers.map((provider) => (
-              <div key={provider.id} className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow border border-gray-100 p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center space-x-3">
-                    <div className="relative">
-                      <div className="w-12 h-12 bg-gray-200 rounded-full overflow-hidden">
-                        {provider.profile_photo ? (
-                          <img
-                            src={`http://localhost:8000/storage/${provider.profile_photo}`}
-                            alt={provider.business_name}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full bg-orange-100 flex items-center justify-center">
-                            <span className="text-orange-600 font-semibold">{provider.business_name.charAt(0)}</span>
+              <div key={provider.id} className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow border border-gray-100 overflow-hidden">
+                {/* Photo de couverture */}
+                {provider.cover_photo && (
+                  <div className="h-32 bg-gradient-to-r from-orange-100 to-red-100 overflow-hidden">
+                    <img
+                      src={`http://localhost:8000/storage/${provider.cover_photo}`}
+                      alt="Couverture"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+                
+                {/* Badge Premium épinglé */}
+                {provider.is_premium && (
+                  <div className="absolute top-2 right-2 bg-gradient-to-r from-orange-500 to-red-500 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg">
+                    <Crown className="w-3 h-3" />
+                    PREMIUM
+                  </div>
+                )}
+                
+                <div className="p-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center space-x-3">
+                      <div className="relative">
+                        <div className="w-12 h-12 bg-gray-200 rounded-full overflow-hidden">
+                          {provider.profile_photo ? (
+                            <img
+                              src={`http://localhost:8000/storage/${provider.profile_photo}`}
+                              alt={provider.business_name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-orange-100 flex items-center justify-center">
+                              <span className="text-orange-600 font-semibold">{provider.business_name.charAt(0)}</span>
+                            </div>
+                          )}
+                        </div>
+                        {provider.is_verified && (
+                          <div className="absolute -bottom-1 -right-1 bg-blue-500 rounded-full p-1">
+                            <CheckCircle className="w-3 h-3 text-white" />
                           </div>
                         )}
                       </div>
-                      {provider.is_premium && (
-                        <div className="absolute -top-1 -right-1 bg-orange-500 rounded-full p-1">
-                          <Crown className="w-3 h-3 text-white" />
-                        </div>
-                      )}
+                      <div>
+                        <h3 className="font-semibold text-gray-900 flex items-center gap-1">
+                          {provider.business_name}
+                          {provider.is_verified && (
+                            <CheckCircle className="w-4 h-4 text-blue-500" title="Certifié" />
+                          )}
+                        </h3>
+                        <p className="text-sm text-gray-600">{provider.user.name}</p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-900">{provider.business_name}</h3>
-                      <p className="text-sm text-gray-600">{provider.user.name}</p>
+                  </div>
+
+                  {provider.category && (
+                    <div className="flex items-center mb-3">
+                      <span className="text-sm mr-2">{provider.category.icon}</span>
+                      <span className="text-sm text-gray-600">{provider.category.name}</span>
+                    </div>
+                  )}
+
+                  <div className="space-y-2 mb-4">
+                    <div className="flex items-center text-sm text-gray-600">
+                      <MapPin className="w-4 h-4 mr-2" />
+                      {provider.city}
+                    </div>
+                    <div className="flex items-center text-sm text-gray-600">
+                      <Phone className="w-4 h-4 mr-2" />
+                      {provider.phone}
                     </div>
                   </div>
-                </div>
 
-                {provider.category && (
-                  <div className="flex items-center mb-3">
-                    <span className="text-sm mr-2">{provider.category.icon}</span>
-                    <span className="text-sm text-gray-600">{provider.category.name}</span>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-1">
+                      <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                      <span className="text-sm font-medium">{parseFloat(provider.rating).toFixed(1)}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <a
+                        href={`tel:${provider.phone}`}
+                        className="bg-orange-600 text-white p-2 rounded-lg hover:bg-orange-700 transition-colors"
+                        title="Appeler"
+                      >
+                        <Phone className="w-4 h-4" />
+                      </a>
+                      <a
+                        href={provider.whatsapp_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="bg-red-600 text-white p-2 rounded-lg hover:bg-red-700 transition-colors"
+                        title="WhatsApp"
+                      >
+                        <MessageCircle className="w-4 h-4" />
+                      </a>
+                    </div>
                   </div>
-                )}
-
-                <div className="space-y-2 mb-4">
-                  <div className="flex items-center text-sm text-gray-600">
-                    <MapPin className="w-4 h-4 mr-2" />
-                    {provider.city}
-                  </div>
-                  <div className="flex items-center text-sm text-gray-600">
-                    <Phone className="w-4 h-4 mr-2" />
-                    {provider.phone}
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-1">
-                    <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                    <span className="text-sm font-medium">{parseFloat(provider.rating).toFixed(1)}</span>
-                  </div>
-                  <a
-                    href={provider.whatsapp_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700 flex items-center space-x-2"
-                  >
-                    <MessageCircle className="w-4 h-4" />
-                    <span>WhatsApp</span>
-                  </a>
                 </div>
               </div>
             ))}

@@ -289,8 +289,8 @@ export default function InscriptionPrestataire() {
             alert('Erreur lors de l\'initialisation du paiement');
           }
         } else {
-          // Gratuit - afficher les identifiants
-          alert(`Inscription réussie !\n\nVos identifiants de connexion:\n📞 Téléphone: ${formData.telephone}\n🔑 Mot de passe: ${formData.telephone}\n\nVous pouvez maintenant vous connecter sur /provider/login`);
+          // Gratuit - redirection directe
+          alert('Inscription réussie !\n\nVous pouvez maintenant vous connecter.');
           window.location.href = '/provider/login';
         }
       } else {

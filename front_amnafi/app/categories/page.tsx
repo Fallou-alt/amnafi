@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Users, Star, Crown, MessageCircle } from 'lucide-react';
+import { ArrowLeft, Users, Star, Crown, MessageCircle, Phone } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useSearchParams } from 'next/navigation';
 
@@ -21,6 +21,7 @@ interface Provider {
   reviews_count: number;
   is_premium: boolean;
   city: string;
+  phone: string;
   profile_photo: string;
   whatsapp_url: string;
   user: {
@@ -256,15 +257,26 @@ export default function CategoriesPage() {
                           </div>
                         </div>
                       </div>
-                      <a
-                        href={provider.whatsapp_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 flex items-center space-x-2"
-                      >
-                        <MessageCircle className="w-5 h-5" />
-                        <span>Contacter</span>
-                      </a>
+                      <div className="flex items-center gap-2">
+                        <a
+                          href={`tel:${provider.phone || ''}`}
+                          className="bg-orange-600 text-white px-4 py-3 rounded-lg hover:bg-orange-700 flex items-center space-x-2 transition-colors"
+                          title="Appeler"
+                        >
+                          <Phone className="w-5 h-5" />
+                          <span>Appeler</span>
+                        </a>
+                        <a
+                          href={provider.whatsapp_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="bg-red-600 text-white px-4 py-3 rounded-lg hover:bg-red-700 flex items-center space-x-2 transition-colors"
+                          title="WhatsApp"
+                        >
+                          <MessageCircle className="w-5 h-5" />
+                          <span>WhatsApp</span>
+                        </a>
+                      </div>
                     </div>
                   </motion.div>
                 ))}

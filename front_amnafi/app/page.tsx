@@ -72,11 +72,8 @@ export default function HomePage() {
               <Link href="/prestataire" className="px-4 py-2 text-orange-600 border border-orange-600 rounded-lg hover:bg-orange-50 transition-colors">
                 Devenir Prestataire
               </Link>
-              <Link href="/auth/login" className="px-4 py-2 text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 transition-colors">
+              <Link href="/provider/login" className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors">
                 Connexion
-              </Link>
-              <Link href="/auth/register" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                Inscription
               </Link>
               <button className="md:hidden p-2">
                 <Menu className="w-5 h-5" />
@@ -375,7 +372,7 @@ export default function HomePage() {
                 <li><a href="#" className="hover:text-white transition-colors">Aide</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">Contact</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">FAQ</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Mentions légales</a></li>
+                <li><Link href="/politique-confidentialite" className="hover:text-white transition-colors">Politique de confidentialité</Link></li>
               </ul>
             </div>
             <div>
@@ -387,7 +384,7 @@ export default function HomePage() {
                 </div>
                 <div className="flex items-center space-x-2">
                   <MessageCircle className="w-4 h-4" />
-                  <span>contact@amnafi.sn</span>
+                  <span>amnaficontact@gmail.com</span>
                 </div>
               </div>
             </div>

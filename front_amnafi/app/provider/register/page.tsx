@@ -22,7 +22,8 @@ export default function ProviderRegistrationPage() {
     city: '',
     description: '',
     profile_photo: null,
-    subscription_type: 'free'
+    subscription_type: 'free',
+    age_confirmed: false
   });
 
   const [paymentData, setPaymentData] = useState(null);
@@ -139,8 +140,8 @@ export default function ProviderRegistrationPage() {
             e.preventDefault(); 
             if (!formData.first_name || !formData.last_name || !formData.phone || 
                 !formData.business_name || !formData.profession || !formData.category_id || 
-                !formData.city || !formData.profile_photo) {
-              alert('Veuillez remplir tous les champs obligatoires');
+                !formData.city || !formData.profile_photo || !formData.age_confirmed) {
+              alert('Veuillez remplir tous les champs obligatoires et confirmer votre âge');
               return;
             }
             console.log('Formulaire étape 1 validé:', formData);
@@ -251,9 +252,31 @@ export default function ProviderRegistrationPage() {
               />
             </div>
 
+            <div className="bg-gradient-to-r from-orange-50 to-red-50 border-2 border-orange-300 rounded-xl p-6">
+              <div className="flex items-start gap-4">
+                <input
+                  type="checkbox"
+                  id="age_confirmed"
+                  checked={formData.age_confirmed}
+                  onChange={(e) => setFormData(prev => ({ ...prev, age_confirmed: e.target.checked }))}
+                  required
+                  className="mt-1 w-5 h-5 text-orange-600 border-2 border-orange-400 rounded focus:ring-2 focus:ring-orange-500 cursor-pointer"
+                />
+                <label htmlFor="age_confirmed" className="flex-1 cursor-pointer">
+                  <p className="text-gray-900 font-semibold text-lg mb-2">
+                    ✓ Je certifie avoir 18 ans ou plus
+                  </p>
+                  <p className="text-gray-700 text-sm leading-relaxed">
+                    En cochant cette case, je confirme sur l'honneur être majeur(e) et avoir la capacité juridique d'utiliser la plateforme AMNAFI conformément à la <a href="/politique-confidentialite" target="_blank" className="text-orange-600 hover:text-orange-700 underline font-medium">Politique de Confidentialité</a>.
+                  </p>
+                </label>
+              </div>
+            </div>
+
             <button
               type="submit"
-              className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700"
+              disabled={!formData.age_confirmed}
+              className="w-full bg-gradient-to-r from-orange-600 to-red-500 text-white py-3 rounded-lg font-semibold hover:from-orange-700 hover:to-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
               Suivant
             </button>

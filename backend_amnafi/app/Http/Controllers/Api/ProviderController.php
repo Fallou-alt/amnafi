@@ -5,82 +5,50 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Provider;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class ProviderController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Provider::where('is_active', true)
-            ->with(['user', 'activeServices', 'reviews', 'category']);
-
-        // Recherche globale par nom, métier, catégorie
-        if ($request->has('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('business_name', 'LIKE', "%{$search}%")
-                  ->orWhere('description', 'LIKE', "%{$search}%")
-                  ->orWhere('city', 'LIKE', "%{$search}%")
-                  ->orWhereHas('category', function($categoryQuery) use ($search) {
-                      $categoryQuery->where('name', 'LIKE', "%{$search}%");
-                  });
-            });
-        }
-
-        // Filtrage par catégorie
-        if ($request->has('category_id')) {
-            $query->where('category_id', $request->category_id);
-        }
-
-        // Filtrage par ville
-        if ($request->has('city')) {
-            $query->where('city', 'LIKE', "%{$request->city}%");
-        }
-
-        // Filtrage par note
-        if ($request->has('min_rating')) {
-            $query->where('rating', '>=', $request->min_rating);
-        }
-
-        // Prestataires vérifiés
-        if ($request->has('verified') && $request->verified) {
-            $query->where('is_verified', true);
-        }
-
-        // Prestataires premium
-        if ($request->has('premium') && $request->premium) {
-            $query->where('is_premium', true)
-                  ->where(function($q) {
-                      $q->whereNull('subscription_expires_at')
-                        ->orWhere('subscription_expires_at', '>', now());
-                  });
-        }
-
-        // Tri (premium en premier)
-        $sortBy = $request->get('sort_by', 'rating');
-        $sortOrder = $request->get('sort_order', 'desc');
+        $cacheKey = 'providers_list_' . md5(json_encode($request->all()));
         
-        if (in_array($sortBy, ['rating', 'reviews_count', 'services_count', 'business_name'])) {
-            $query->orderBy('is_premium', 'desc')
-                  ->orderBy($sortBy, $sortOrder);
-        } else {
-            $query->orderBy('is_premium', 'desc')
-                  ->orderBy('is_verified', 'desc')
-                  ->orderBy('rating', 'desc')
-                  ->orderBy('business_name', 'asc');
-        }
+        $providers = Cache::remember($cacheKey, 300, function () use ($request) {
+            $query = Provider::where('is_active', true)
+                ->with(['user:id,name,phone', 'category:id,name,icon,color']);
 
-        $providers = $query->paginate($request->get('per_page', 12));
+            if ($request->has('search')) {
+                $search = $request->search;
+                $query->where(function ($q) use ($search) {
+                    $q->where('business_name', 'LIKE', "%{$search}%")
+                      ->orWhere('city', 'LIKE', "%{$search}%");
+                });
+            }
 
-        // Ajouter les informations d'abonnement et URL photo
+            if ($request->has('category_id')) {
+                $query->where('category_id', $request->category_id);
+            }
+
+            if ($request->has('city')) {
+                $query->where('city', 'LIKE', "%{$request->city}%");
+            }
+
+            $query->orderBy('is_premium', 'desc')
+                  ->orderBy('rating', 'desc');
+
+            return $query->paginate($request->get('per_page', 12));
+        });
+
         $providers->getCollection()->transform(function ($provider) {
             $provider->subscription_info = [
                 'is_premium' => $provider->isPremium(),
                 'subscription_type' => $provider->subscription_type,
-                'expires_at' => $provider->subscription_expires_at,
                 'badge_visible' => $provider->isPremium()
             ];
             $provider->profile_photo_url = $provider->profile_photo ? 
                 url('storage/' . $provider->profile_photo) : null;
+            $provider->cover_photo_url = $provider->cover_photo ? 
+                url('storage/' . $provider->cover_photo) : null;
             $provider->whatsapp_url = 'https://wa.me/' . preg_replace('/[^0-9]/', '', $provider->phone);
             return $provider;
         });
@@ -133,6 +101,8 @@ class ProviderController extends Controller
         $providers->transform(function ($provider) {
             $provider->profile_photo_url = $provider->profile_photo ? 
                 url('storage/' . $provider->profile_photo) : null;
+            $provider->cover_photo_url = $provider->cover_photo ? 
+                url('storage/' . $provider->cover_photo) : null;
             $provider->whatsapp_url = 'https://wa.me/' . preg_replace('/[^0-9]/', '', $provider->phone);
             return $provider;
         });
@@ -156,6 +126,8 @@ class ProviderController extends Controller
         $providers->transform(function ($provider) {
             $provider->profile_photo_url = $provider->profile_photo ? 
                 url('storage/' . $provider->profile_photo) : null;
+            $provider->cover_photo_url = $provider->cover_photo ? 
+                url('storage/' . $provider->cover_photo) : null;
             $provider->whatsapp_url = 'https://wa.me/' . preg_replace('/[^0-9]/', '', $provider->phone);
             return $provider;
         });
@@ -180,6 +152,8 @@ class ProviderController extends Controller
         $providers->transform(function ($provider) {
             $provider->profile_photo_url = $provider->profile_photo ? 
                 url('storage/' . $provider->profile_photo) : null;
+            $provider->cover_photo_url = $provider->cover_photo ? 
+                url('storage/' . $provider->cover_photo) : null;
             $provider->whatsapp_url = 'https://wa.me/' . preg_replace('/[^0-9]/', '', $provider->phone);
             return $provider;
         });
@@ -343,6 +317,8 @@ class ProviderController extends Controller
         $providers->transform(function ($provider) {
             $provider->profile_photo_url = $provider->profile_photo ? 
                 url('storage/' . $provider->profile_photo) : null;
+            $provider->cover_photo_url = $provider->cover_photo ? 
+                url('storage/' . $provider->cover_photo) : null;
             $provider->whatsapp_url = 'https://wa.me/' . preg_replace('/[^0-9]/', '', $provider->phone);
             return $provider;
         });

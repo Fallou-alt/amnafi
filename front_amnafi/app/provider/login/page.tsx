@@ -35,7 +35,7 @@ export default function ProviderLoginPage() {
         localStorage.setItem('provider', JSON.stringify(response.data.data.provider));
 
         alert('Connexion réussie !');
-        router.push('/provider/dashboard');
+        router.push('/provider/profile');
       }
     } catch (error: any) {
       setError(error.response?.data?.message || 'Erreur de connexion');
