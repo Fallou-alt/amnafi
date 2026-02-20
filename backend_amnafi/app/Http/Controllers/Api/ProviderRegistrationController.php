@@ -52,20 +52,28 @@ class ProviderRegistrationController extends Controller
         $email = $request->email ?? ($phone . '@amnafi.local');
         $fullName = $request->first_name . ' ' . $request->last_name;
         
-        $existingUser = User::where('phone', $request->phone)->first();
-        if ($existingUser) {
+        // Vérifier si le numéro a déjà 2 profils
+        $existingProvidersCount = Provider::where('phone', $request->phone)->count();
+        if ($existingProvidersCount >= 2) {
             return response()->json([
                 'success' => false,
-                'message' => 'Ce numéro de téléphone est déjà utilisé'
+                'message' => 'Ce numéro de téléphone a déjà atteint la limite de 2 profils prestataires'
             ], 400);
         }
-
-        $user = User::create([
-            'name' => $fullName,
-            'email' => $email,
-            'phone' => $request->phone,
-            'password' => Hash::make($request->phone), // Mot de passe = numéro de téléphone
-        ]);
+        
+        $existingUser = User::where('phone', $request->phone)->first();
+        if ($existingUser) {
+            // Si l'utilisateur existe déjà, on l'utilise pour créer un nouveau profil prestataire
+            $user = $existingUser;
+        } else {
+            // Sinon on crée un nouvel utilisateur
+            $user = User::create([
+                'name' => $fullName,
+                'email' => $email,
+                'phone' => $request->phone,
+                'password' => Hash::make($request->phone),
+            ]);
+        }
 
         $provider = Provider::create([
             'business_name' => $request->business_name,
@@ -140,19 +148,34 @@ class ProviderRegistrationController extends Controller
             throw new \Exception('Photo de profil requise');
         }
 
-        $filename = 'profile_' . Str::random(20) . '.jpg';
-        $path = 'providers/photos/' . $filename;
-        
-        Storage::disk('public')->makeDirectory('providers/photos');
-        
-        $manager = new ImageManager(new Driver());
-        $image = $manager->read($file)
-            ->cover(400, 400)
-            ->toJpeg(85);
-        
-        Storage::disk('public')->put($path, $image);
-        
-        return $path;
+        try {
+            $filename = 'profile_' . Str::random(20) . '.jpg';
+            $path = 'providers/photos/' . $filename;
+            
+            // Créer le répertoire s'il n'existe pas
+            if (!Storage::disk('public')->exists('providers/photos')) {
+                Storage::disk('public')->makeDirectory('providers/photos');
+            }
+            
+            // Vérifier si Intervention Image est disponible
+            if (class_exists('Intervention\Image\ImageManager')) {
+                $manager = new ImageManager(new Driver());
+                $image = $manager->read($file)
+                    ->cover(400, 400)
+                    ->toJpeg(85);
+                
+                Storage::disk('public')->put($path, $image);
+            } else {
+                // Fallback: upload direct sans redimensionnement
+                $path = $file->store('providers/photos', 'public');
+            }
+            
+            return $path;
+        } catch (\Exception $e) {
+            \Log::error('Erreur upload photo: ' . $e->getMessage());
+            // Fallback: upload direct
+            return $file->store('providers/photos', 'public');
+        }
     }
 
     public function updateProfilePhoto(Request $request)
@@ -205,19 +228,34 @@ class ProviderRegistrationController extends Controller
     
     private function handleCoverPhotoUpload($file)
     {
-        $filename = 'cover_' . Str::random(20) . '.jpg';
-        $path = 'providers/covers/' . $filename;
-        
-        Storage::disk('public')->makeDirectory('providers/covers');
-        
-        $manager = new ImageManager(new Driver());
-        $image = $manager->read($file)
-            ->cover(1200, 400)
-            ->toJpeg(85);
-        
-        Storage::disk('public')->put($path, $image);
-        
-        return $path;
+        try {
+            $filename = 'cover_' . Str::random(20) . '.jpg';
+            $path = 'providers/covers/' . $filename;
+            
+            // Créer le répertoire s'il n'existe pas
+            if (!Storage::disk('public')->exists('providers/covers')) {
+                Storage::disk('public')->makeDirectory('providers/covers');
+            }
+            
+            // Vérifier si Intervention Image est disponible
+            if (class_exists('Intervention\Image\ImageManager')) {
+                $manager = new ImageManager(new Driver());
+                $image = $manager->read($file)
+                    ->cover(1200, 400)
+                    ->toJpeg(85);
+                
+                Storage::disk('public')->put($path, $image);
+            } else {
+                // Fallback: upload direct sans redimensionnement
+                $path = $file->store('providers/covers', 'public');
+            }
+            
+            return $path;
+        } catch (\Exception $e) {
+            \Log::error('Erreur upload cover: ' . $e->getMessage());
+            // Fallback: upload direct
+            return $file->store('providers/covers', 'public');
+        }
     }
 
     public function getCategories()

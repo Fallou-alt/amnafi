@@ -84,8 +84,8 @@ export default function HomePage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-cover bg-center text-gray-800" style={{backgroundImage: 'url(/images/positif.jpg)'}}>
-        <div className="absolute inset-0 bg-gradient-to-br from-white/90 to-gray-100/90"></div>
+      <section className="relative overflow-hidden bg-cover bg-center text-gray-800" style={{backgroundImage: 'url(/images/accueil.png)'}}>
+        <div className="absolute inset-0 bg-white/80"></div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
           <div className="text-center">
             {/* Logo animé */}
@@ -219,6 +219,223 @@ export default function HomePage() {
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               La plateforme idéale pour trouver des services de qualité près de chez vous
             </p>
+          </div>
+
+          {/* Bande passante animée */}
+          <div className="mb-16 overflow-hidden">
+            <div className="relative">
+              <div className="flex animate-scroll-infinite">
+                {/* Première série d'images */}
+                <div className="flex space-x-6 px-3">
+                  <motion.div 
+                    whileHover={{ scale: 1.05 }}
+                    className="flex-shrink-0 w-80 bg-white rounded-2xl overflow-hidden shadow-lg"
+                  >
+                    <div className="h-48 overflow-hidden">
+                      <img 
+                        src="/images/f1.png" 
+                        alt="Collaboration" 
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="p-6">
+                      <h3 className="text-xl font-bold text-gray-900 mb-2">Collaboration</h3>
+                      <p className="text-gray-600">Des professionnels qui travaillent ensemble pour votre satisfaction</p>
+                    </div>
+                  </motion.div>
+
+                  <motion.div 
+                    whileHover={{ scale: 1.05 }}
+                    className="flex-shrink-0 w-80 bg-white rounded-2xl overflow-hidden shadow-lg"
+                  >
+                    <div className="h-48 overflow-hidden">
+                      <img 
+                        src="/images/f2.png" 
+                        alt="Innovation" 
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="p-6">
+                      <h3 className="text-xl font-bold text-gray-900 mb-2">Innovation</h3>
+                      <p className="text-gray-600">Une plateforme moderne pour des services de qualité</p>
+                    </div>
+                  </motion.div>
+
+                  <motion.div 
+                    whileHover={{ scale: 1.05 }}
+                    className="flex-shrink-0 w-80 bg-white rounded-2xl overflow-hidden shadow-lg"
+                  >
+                    <div className="h-48 overflow-hidden">
+                      <img 
+                        src="/images/f3.png" 
+                        alt="Excellence" 
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="p-6">
+                      <h3 className="text-xl font-bold text-gray-900 mb-2">Excellence</h3>
+                      <p className="text-gray-600">Des prestataires sélectionnés pour leur expertise</p>
+                    </div>
+                  </motion.div>
+
+                  <motion.div 
+                    whileHover={{ scale: 1.05 }}
+                    className="flex-shrink-0 w-80 bg-white rounded-2xl overflow-hidden shadow-lg"
+                  >
+                    <div className="h-48 overflow-hidden">
+                      <img 
+                        src="/images/f4.png" 
+                        alt="Confiance" 
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="p-6">
+                      <h3 className="text-xl font-bold text-gray-900 mb-2">Confiance</h3>
+                      <p className="text-gray-600">Une communauté basée sur la transparence et la qualité</p>
+                    </div>
+                  </motion.div>
+
+                  <motion.div 
+                    whileHover={{ scale: 1.05 }}
+                    className="flex-shrink-0 w-80 bg-white rounded-2xl overflow-hidden shadow-lg"
+                  >
+                    <div className="h-48 overflow-hidden">
+                      <img 
+                        src="/images/f1.png" 
+                        alt="Engagement" 
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="p-6">
+                      <h3 className="text-xl font-bold text-gray-900 mb-2">Engagement</h3>
+                      <p className="text-gray-600">Des professionnels dévoués à votre service</p>
+                    </div>
+                  </motion.div>
+
+                  <motion.div 
+                    whileHover={{ scale: 1.05 }}
+                    className="flex-shrink-0 w-80 bg-white rounded-2xl overflow-hidden shadow-lg"
+                  >
+                    <div className="h-48 overflow-hidden">
+                      <img 
+                        src="/images/f2.png" 
+                        alt="Passion" 
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="p-6">
+                      <h3 className="text-xl font-bold text-gray-900 mb-2">Passion</h3>
+                      <p className="text-gray-600">L'amour du travail bien fait au quotidien</p>
+                    </div>
+                  </motion.div>
+                </div>
+
+                {/* Duplication pour défilement infini */}
+                <div className="flex space-x-6 px-3">
+                  <motion.div 
+                    whileHover={{ scale: 1.05 }}
+                    className="flex-shrink-0 w-80 bg-white rounded-2xl overflow-hidden shadow-lg"
+                  >
+                    <div className="h-48 overflow-hidden">
+                      <img 
+                        src="/images/f1.png" 
+                        alt="Collaboration" 
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="p-6">
+                      <h3 className="text-xl font-bold text-gray-900 mb-2">Collaboration</h3>
+                      <p className="text-gray-600">Des professionnels qui travaillent ensemble pour votre satisfaction</p>
+                    </div>
+                  </motion.div>
+
+                  <motion.div 
+                    whileHover={{ scale: 1.05 }}
+                    className="flex-shrink-0 w-80 bg-white rounded-2xl overflow-hidden shadow-lg"
+                  >
+                    <div className="h-48 overflow-hidden">
+                      <img 
+                        src="/images/f2.png" 
+                        alt="Innovation" 
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="p-6">
+                      <h3 className="text-xl font-bold text-gray-900 mb-2">Innovation</h3>
+                      <p className="text-gray-600">Une plateforme moderne pour des services de qualité</p>
+                    </div>
+                  </motion.div>
+
+                  <motion.div 
+                    whileHover={{ scale: 1.05 }}
+                    className="flex-shrink-0 w-80 bg-white rounded-2xl overflow-hidden shadow-lg"
+                  >
+                    <div className="h-48 overflow-hidden">
+                      <img 
+                        src="/images/f3.png" 
+                        alt="Excellence" 
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="p-6">
+                      <h3 className="text-xl font-bold text-gray-900 mb-2">Excellence</h3>
+                      <p className="text-gray-600">Des prestataires sélectionnés pour leur expertise</p>
+                    </div>
+                  </motion.div>
+
+                  <motion.div 
+                    whileHover={{ scale: 1.05 }}
+                    className="flex-shrink-0 w-80 bg-white rounded-2xl overflow-hidden shadow-lg"
+                  >
+                    <div className="h-48 overflow-hidden">
+                      <img 
+                        src="/images/f4.png" 
+                        alt="Confiance" 
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="p-6">
+                      <h3 className="text-xl font-bold text-gray-900 mb-2">Confiance</h3>
+                      <p className="text-gray-600">Une communauté basée sur la transparence et la qualité</p>
+                    </div>
+                  </motion.div>
+
+                  <motion.div 
+                    whileHover={{ scale: 1.05 }}
+                    className="flex-shrink-0 w-80 bg-white rounded-2xl overflow-hidden shadow-lg"
+                  >
+                    <div className="h-48 overflow-hidden">
+                      <img 
+                        src="/images/f1.png" 
+                        alt="Engagement" 
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="p-6">
+                      <h3 className="text-xl font-bold text-gray-900 mb-2">Engagement</h3>
+                      <p className="text-gray-600">Des professionnels dévoués à votre service</p>
+                    </div>
+                  </motion.div>
+
+                  <motion.div 
+                    whileHover={{ scale: 1.05 }}
+                    className="flex-shrink-0 w-80 bg-white rounded-2xl overflow-hidden shadow-lg"
+                  >
+                    <div className="h-48 overflow-hidden">
+                      <img 
+                        src="/images/f2.png" 
+                        alt="Passion" 
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="p-6">
+                      <h3 className="text-xl font-bold text-gray-900 mb-2">Passion</h3>
+                      <p className="text-gray-600">L'amour du travail bien fait au quotidien</p>
+                    </div>
+                  </motion.div>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">

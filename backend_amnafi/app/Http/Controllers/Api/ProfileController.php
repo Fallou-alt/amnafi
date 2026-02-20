@@ -29,6 +29,7 @@ class ProfileController extends Controller
                     'business_name' => $user->provider->business_name,
                     'description' => $user->provider->description,
                     'phone' => $user->provider->phone,
+                    'secondary_phone' => $user->provider->secondary_phone,
                     'email' => $user->provider->email,
                     'website' => $user->provider->website,
                     'address' => $user->provider->address,
@@ -60,6 +61,7 @@ class ProfileController extends Controller
             'business_name' => 'sometimes|string|max:255',
             'description' => 'sometimes|string|max:1000',
             'provider_phone' => 'sometimes|string|max:20',
+            'provider_secondary_phone' => 'sometimes|nullable|string|max:20',
             'provider_email' => 'sometimes|email|max:255',
             'website' => 'sometimes|url|max:255',
             'address' => 'sometimes|string|max:255',
@@ -86,6 +88,9 @@ class ProfileController extends Controller
             
             if (isset($validated['provider_phone'])) {
                 $providerData['phone'] = $validated['provider_phone'];
+            }
+            if (isset($validated['provider_secondary_phone'])) {
+                $providerData['secondary_phone'] = $validated['provider_secondary_phone'];
             }
             if (isset($validated['provider_email'])) {
                 $providerData['email'] = $validated['provider_email'];

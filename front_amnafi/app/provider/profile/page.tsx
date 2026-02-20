@@ -20,6 +20,7 @@ export default function ProviderProfile() {
     business_name: '',
     description: '',
     provider_phone: '',
+    provider_secondary_phone: '',
     provider_email: '',
     website: '',
     address: '',
@@ -63,6 +64,7 @@ export default function ProviderProfile() {
         business_name: data.provider?.business_name || '',
         description: data.provider?.description || '',
         provider_phone: data.provider?.phone || '',
+        provider_secondary_phone: data.provider?.secondary_phone || '',
         provider_email: data.provider?.email || '',
         website: data.provider?.website || '',
         address: data.provider?.address || '',
@@ -379,6 +381,19 @@ export default function ProviderProfile() {
                   type="tel"
                   value={profile.provider_phone}
                   onChange={(e) => setProfile({...profile, provider_phone: e.target.value})}
+                  className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Téléphone secondaire (facultatif)</label>
+              <div className="relative">
+                <Phone className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+                <input
+                  type="tel"
+                  value={profile.provider_secondary_phone}
+                  onChange={(e) => setProfile({...profile, provider_secondary_phone: e.target.value})}
+                  placeholder="Numéro alternatif"
                   className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
               </div>

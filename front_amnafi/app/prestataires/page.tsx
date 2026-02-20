@@ -262,7 +262,7 @@ export default function AllProviders() {
                         href={provider.whatsapp_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="bg-red-600 text-white p-2 rounded-lg hover:bg-red-700 transition-colors"
+                        className="bg-green-600 text-white p-2 rounded-lg hover:bg-green-700 transition-colors"
                         title="WhatsApp"
                       >
                         <MessageCircle className="w-4 h-4" />

@@ -24,6 +24,7 @@ class Provider extends Model
         'slug',
         'description',
         'phone',
+        'secondary_phone',
         'email',
         'website',
         'address',
