@@ -118,8 +118,8 @@ export default function AllProviders() {
           </div>
 
           {/* Barre de recherche */}
-          <div className="bg-gradient-to-r from-orange-50 to-red-50 p-6 rounded-2xl shadow-md border border-orange-100">
-            <div className="flex flex-col md:flex-row gap-4">
+          <div className="bg-gradient-to-r from-orange-50 to-red-50 p-4 sm:p-6 rounded-2xl shadow-md border border-orange-100">
+            <div className="flex flex-col gap-3">
               <div className="flex-1">
                 <input
                   type="text"
@@ -130,27 +130,29 @@ export default function AllProviders() {
                   onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
                 />
               </div>
-              <div className="md:w-64">
-                <select
-                  value={selectedCategory}
-                  onChange={(e) => handleCategoryChange(e.target.value)}
-                  className="w-full px-4 py-3 border-2 border-orange-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-400 transition-all shadow-sm"
+              <div className="flex flex-col sm:flex-row gap-3">
+                <div className="flex-1">
+                  <select
+                    value={selectedCategory}
+                    onChange={(e) => handleCategoryChange(e.target.value)}
+                    className="w-full px-4 py-3 border-2 border-orange-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-400 transition-all shadow-sm"
+                  >
+                    <option value="">Toutes les catégories</option>
+                    {categories.map((category) => (
+                      <option key={category.id} value={category.id}>
+                        {category.icon} {category.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <button
+                  onClick={handleSearch}
+                  className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-xl hover:from-orange-700 hover:to-red-700 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl transition-all font-semibold"
                 >
-                  <option value="">Toutes les catégories</option>
-                  {categories.map((category) => (
-                    <option key={category.id} value={category.id}>
-                      {category.icon} {category.name}
-                    </option>
-                  ))}
-                </select>
+                  <Search className="w-4 h-4" />
+                  <span>Rechercher</span>
+                </button>
               </div>
-              <button
-                onClick={handleSearch}
-                className="px-6 py-3 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-xl hover:from-orange-700 hover:to-red-700 flex items-center space-x-2 shadow-lg hover:shadow-xl transition-all font-semibold"
-              >
-                <Search className="w-4 h-4" />
-                <span>Rechercher</span>
-              </button>
             </div>
           </div>
         </div>

@@ -11,6 +11,7 @@ export default function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
   const [categories, setCategories] = useState([]);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     fetchCategories();
@@ -68,19 +69,72 @@ export default function HomePage() {
             </div>
 
             {/* Boutons */}
-            <div className="flex items-center space-x-4">
-              <Link href="/prestataire" className="px-4 py-2 text-orange-600 border border-orange-600 rounded-lg hover:bg-orange-50 transition-colors">
+            <div className="flex items-center space-x-2 md:space-x-4">
+              <Link href="/prestataire" className="hidden sm:block px-3 md:px-4 py-2 text-sm md:text-base text-orange-600 border border-orange-600 rounded-lg hover:bg-orange-50 transition-colors">
                 Devenir Prestataire
               </Link>
-              <Link href="/provider/login" className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors">
+              <Link href="/provider/login" className="hidden sm:block px-3 md:px-4 py-2 text-sm md:text-base bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors">
                 Connexion
               </Link>
-              <button className="md:hidden p-2">
-                <Menu className="w-5 h-5" />
+              <button 
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="md:hidden p-2 text-gray-700 hover:text-orange-600 transition-colors"
+              >
+                <Menu className="w-6 h-6" />
               </button>
             </div>
           </div>
         </div>
+
+        {/* Menu Mobile */}
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="md:hidden bg-white border-t border-gray-200"
+          >
+            <div className="px-4 py-4 space-y-3">
+              <Link 
+                href="/services" 
+                className="block py-2 text-gray-700 hover:text-blue-600 transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Services
+              </Link>
+              <Link 
+                href="/prestataires" 
+                className="block py-2 text-gray-700 hover:text-blue-600 transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Prestataires
+              </Link>
+              <a 
+                href="#about" 
+                className="block py-2 text-gray-700 hover:text-blue-600 transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                À propos
+              </a>
+              <div className="pt-3 border-t border-gray-200 space-y-2">
+                <Link 
+                  href="/prestataire" 
+                  className="block w-full px-4 py-2 text-center text-orange-600 border border-orange-600 rounded-lg hover:bg-orange-50 transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Devenir Prestataire
+                </Link>
+                <Link 
+                  href="/provider/login" 
+                  className="block w-full px-4 py-2 text-center bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Connexion
+                </Link>
+              </div>
+            </div>
+          </motion.div>
+        )}
       </nav>
 
       {/* Hero Section */}
@@ -155,11 +209,11 @@ export default function HomePage() {
                   </div>
 
                   {/* Filtres */}
-                  <div className="flex gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2">
                     <select 
                       value={selectedCategory}
                       onChange={(e) => setSelectedCategory(e.target.value)}
-                      className="px-4 py-3 text-gray-700 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full sm:w-auto px-4 py-3 text-gray-700 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                       <option value="">Tous les métiers</option>
                       {categories.map((category) => (
@@ -172,7 +226,7 @@ export default function HomePage() {
                     <select 
                       value={selectedCity}
                       onChange={(e) => setSelectedCity(e.target.value)}
-                      className="px-4 py-3 text-gray-700 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full sm:w-auto px-4 py-3 text-gray-700 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                       <option value="">Toutes les villes</option>
                       <option value="dakar">Dakar</option>
@@ -191,7 +245,7 @@ export default function HomePage() {
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={handleSearch}
-                      className="px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors font-medium"
+                      className="w-full sm:w-auto px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors font-medium"
                     >
                       Rechercher
                     </motion.button>
