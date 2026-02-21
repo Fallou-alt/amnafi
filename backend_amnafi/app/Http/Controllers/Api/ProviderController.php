@@ -20,9 +20,23 @@ class ProviderController extends Controller
             if ($request->has('search')) {
                 $search = $request->search;
                 $query->where(function ($q) use ($search) {
-                    $q->where('business_name', 'LIKE', "%{$search}%")
-                      ->orWhere('city', 'LIKE', "%{$search}%");
-                });
+                    $q->where('business_name', 'LIKE', "{$search}%")
+                      ->orWhere('business_name', 'LIKE', "%{$search}%")
+                      ->orWhere('description', 'LIKE', "%{$search}%")
+                      ->orWhere('city', 'LIKE', "%{$search}%")
+                      ->orWhereHas('user', function($userQuery) use ($search) {
+                          $userQuery->where('name', 'LIKE', "%{$search}%");
+                      })
+                      ->orWhereHas('category', function($categoryQuery) use ($search) {
+                          $categoryQuery->where('name', 'LIKE', "{$search}%")
+                                       ->orWhere('name', 'LIKE', "%{$search}%");
+                      });
+                })
+                ->orderByRaw("CASE 
+                    WHEN business_name LIKE '{$search}%' THEN 1
+                    WHEN business_name LIKE '%{$search}%' THEN 2
+                    WHEN city LIKE '{$search}%' THEN 3
+                    ELSE 4 END");
             }
 
             if ($request->has('category_id')) {
