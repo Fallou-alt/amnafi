@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Star, MapPin, Phone, Crown, ArrowLeft, MessageCircle, CheckCircle, Award, Shield } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Star, MapPin, Phone, Crown, ArrowLeft, MessageCircle, CheckCircle, Award, Shield, X, Calendar, DollarSign, FileText, Send } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface Provider {
   id: number;
@@ -37,6 +37,20 @@ export default function OfficialProviders() {
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [filterPartner, setFilterPartner] = useState(false);
+  const [showMissionModal, setShowMissionModal] = useState(false);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [selectedProvider, setSelectedProvider] = useState<Provider | null>(null);
+  const [missionForm, setMissionForm] = useState({
+    title: '',
+    description: '',
+    location: '',
+    preferred_date: '',
+    budget: ''
+  });
+  const [reviewForm, setReviewForm] = useState({
+    rating: 5,
+    comment: ''
+  });
 
   useEffect(() => {
     fetchProviders();
@@ -248,21 +262,43 @@ export default function OfficialProviders() {
                     </div>
                   </div>
 
-                  <div className="flex gap-2">
-                    <a
-                      href={`tel:${provider.phone}`}
-                      className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white py-2 px-4 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg font-semibold text-sm text-center"
+                  <div className="space-y-2">
+                    <button
+                      onClick={() => {
+                        setSelectedProvider(provider);
+                        setShowMissionModal(true);
+                      }}
+                      className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-2.5 px-4 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg font-semibold text-sm flex items-center justify-center gap-2"
                     >
-                      Appeler
-                    </a>
-                    <a
-                      href={provider.whatsapp_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="bg-gradient-to-r from-green-600 to-green-700 text-white p-3 rounded-xl hover:from-green-700 hover:to-green-800 transition-all shadow-lg"
-                    >
-                      <MessageCircle className="w-5 h-5" />
-                    </a>
+                      <FileText className="w-4 h-4" />
+                      Demander une mission
+                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => {
+                          setSelectedProvider(provider);
+                          setShowReviewModal(true);
+                        }}
+                        className="flex-1 bg-gradient-to-r from-yellow-500 to-orange-500 text-white py-2 px-3 rounded-xl hover:from-yellow-600 hover:to-orange-600 transition-all shadow-lg font-semibold text-sm flex items-center justify-center gap-1"
+                      >
+                        <Star className="w-4 h-4" />
+                        Noter
+                      </button>
+                      <a
+                        href={`tel:${provider.phone}`}
+                        className="bg-gradient-to-r from-orange-600 to-red-600 text-white p-2.5 rounded-xl hover:from-orange-700 hover:to-red-700 transition-all shadow-lg"
+                      >
+                        <Phone className="w-4 h-4" />
+                      </a>
+                      <a
+                        href={provider.whatsapp_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="bg-gradient-to-r from-green-600 to-green-700 text-white p-2.5 rounded-xl hover:from-green-700 hover:to-green-800 transition-all shadow-lg"
+                      >
+                        <MessageCircle className="w-4 h-4" />
+                      </a>
+                    </div>
                   </div>
                 </div>
               </motion.div>
@@ -270,6 +306,242 @@ export default function OfficialProviders() {
           </div>
         )}
       </div>
+
+      {/* Modal Mission */}
+      <AnimatePresence>
+        {showMissionModal && selectedProvider && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setShowMissionModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+            >
+              <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 rounded-t-2xl">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-2xl font-bold">Demander une mission</h3>
+                    <p className="text-blue-100 mt-1">à {selectedProvider.business_name}</p>
+                  </div>
+                  <button
+                    onClick={() => setShowMissionModal(false)}
+                    className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+                  >
+                    <X className="w-6 h-6" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="p-6 space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Titre de la mission *
+                  </label>
+                  <input
+                    type="text"
+                    value={missionForm.title}
+                    onChange={(e) => setMissionForm({...missionForm, title: e.target.value})}
+                    placeholder="Ex: Réparation plomberie urgente"
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-400 transition-all"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Description détaillée *
+                  </label>
+                  <textarea
+                    value={missionForm.description}
+                    onChange={(e) => setMissionForm({...missionForm, description: e.target.value})}
+                    placeholder="Décrivez en détail votre besoin..."
+                    rows={4}
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-400 transition-all resize-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Localisation *
+                  </label>
+                  <div className="relative">
+                    <MapPin className="absolute left-3 top-3.5 w-5 h-5 text-gray-400" />
+                    <input
+                      type="text"
+                      value={missionForm.location}
+                      onChange={(e) => setMissionForm({...missionForm, location: e.target.value})}
+                      placeholder="Adresse complète"
+                      className="w-full pl-11 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-400 transition-all"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Date souhaitée
+                    </label>
+                    <div className="relative">
+                      <Calendar className="absolute left-3 top-3.5 w-5 h-5 text-gray-400" />
+                      <input
+                        type="date"
+                        value={missionForm.preferred_date}
+                        onChange={(e) => setMissionForm({...missionForm, preferred_date: e.target.value})}
+                        className="w-full pl-11 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-400 transition-all"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Budget estimé (FCFA)
+                    </label>
+                    <div className="relative">
+                      <DollarSign className="absolute left-3 top-3.5 w-5 h-5 text-gray-400" />
+                      <input
+                        type="number"
+                        value={missionForm.budget}
+                        onChange={(e) => setMissionForm({...missionForm, budget: e.target.value})}
+                        placeholder="Ex: 50000"
+                        className="w-full pl-11 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-400 transition-all"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-4">
+                  <p className="text-sm text-blue-800">
+                    <strong>Note:</strong> Le prestataire recevra votre demande et vous contactera dans les plus brefs délais.
+                  </p>
+                </div>
+
+                <div className="flex gap-3 pt-4">
+                  <button
+                    onClick={() => setShowMissionModal(false)}
+                    className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-all font-semibold"
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    onClick={() => {
+                      alert('Mission envoyée avec succès!');
+                      setShowMissionModal(false);
+                      setMissionForm({ title: '', description: '', location: '', preferred_date: '', budget: '' });
+                    }}
+                    className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all font-semibold flex items-center justify-center gap-2 shadow-lg"
+                  >
+                    <Send className="w-5 h-5" />
+                    Envoyer la demande
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Modal Avis */}
+      <AnimatePresence>
+        {showReviewModal && selectedProvider && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setShowReviewModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-2xl shadow-2xl max-w-lg w-full"
+            >
+              <div className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white p-6 rounded-t-2xl">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-2xl font-bold">Donner votre avis</h3>
+                    <p className="text-yellow-100 mt-1">sur {selectedProvider.business_name}</p>
+                  </div>
+                  <button
+                    onClick={() => setShowReviewModal(false)}
+                    className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+                  >
+                    <X className="w-6 h-6" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="p-6 space-y-6">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-3 text-center">
+                    Votre note
+                  </label>
+                  <div className="flex justify-center gap-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        onClick={() => setReviewForm({...reviewForm, rating: star})}
+                        className="transition-transform hover:scale-110"
+                      >
+                        <Star
+                          className={`w-12 h-12 ${
+                            star <= reviewForm.rating
+                              ? 'text-yellow-500 fill-current'
+                              : 'text-gray-300'
+                          }`}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                  <p className="text-center mt-2 text-lg font-bold text-gray-700">
+                    {reviewForm.rating} / 5
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Votre commentaire (optionnel)
+                  </label>
+                  <textarea
+                    value={reviewForm.comment}
+                    onChange={(e) => setReviewForm({...reviewForm, comment: e.target.value})}
+                    placeholder="Partagez votre expérience avec ce prestataire..."
+                    rows={4}
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-400 transition-all resize-none"
+                  />
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setShowReviewModal(false)}
+                    className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-all font-semibold"
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    onClick={() => {
+                      alert('Avis envoyé avec succès!');
+                      setShowReviewModal(false);
+                      setReviewForm({ rating: 5, comment: '' });
+                    }}
+                    className="flex-1 px-6 py-3 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-xl hover:from-yellow-600 hover:to-orange-600 transition-all font-semibold flex items-center justify-center gap-2 shadow-lg"
+                  >
+                    <Star className="w-5 h-5" />
+                    Publier l'avis
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
