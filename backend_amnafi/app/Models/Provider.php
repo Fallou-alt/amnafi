@@ -49,7 +49,18 @@ class Provider extends Model
         'category_id',
         'subscription_type',
         'subscription_expires_at',
-        'is_premium'
+        'is_premium',
+        'is_official',
+        'is_partner',
+        'certifications',
+        'diplomas',
+        'practical_evaluation',
+        'recommendations',
+        'contract_number',
+        'contract_start_date',
+        'contract_end_date',
+        'service_rating',
+        'service_reviews_count'
     ];
 
     protected $casts = [
@@ -61,11 +72,20 @@ class Provider extends Model
         'is_hidden' => 'boolean',
         'is_locked' => 'boolean',
         'is_premium' => 'boolean',
+        'is_official' => 'boolean',
+        'is_partner' => 'boolean',
+        'certifications' => 'array',
+        'diplomas' => 'array',
+        'recommendations' => 'array',
         'rating' => 'decimal:2',
+        'service_rating' => 'decimal:2',
         'reviews_count' => 'integer',
+        'service_reviews_count' => 'integer',
         'services_count' => 'integer',
         'subscription_expires_at' => 'datetime',
-        'locked_until' => 'datetime'
+        'locked_until' => 'datetime',
+        'contract_start_date' => 'date',
+        'contract_end_date' => 'date'
     ];
 
     public function category()
@@ -91,6 +111,16 @@ class Provider extends Model
     public function reviews()
     {
         return $this->hasMany(Review::class);
+    }
+
+    public function serviceReviews()
+    {
+        return $this->hasMany(ServiceReview::class);
+    }
+
+    public function missions()
+    {
+        return $this->hasMany(Mission::class);
     }
 
     public function getRouteKeyName()

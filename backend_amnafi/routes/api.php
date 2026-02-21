@@ -117,6 +117,10 @@ Route::prefix('public')->group(function () {
     Route::get('/search', [App\Http\Controllers\Api\ProviderController::class, 'globalSearch']);
     Route::apiResource('providers', App\Http\Controllers\Api\ProviderController::class)->only(['index', 'show']);
     
+    // Official Providers
+    Route::get('/official-providers', [App\Http\Controllers\Api\OfficialProviderController::class, 'index']);
+    Route::get('/official-providers/{id}', [App\Http\Controllers\Api\OfficialProviderController::class, 'show']);
+    
     // Reviews
     Route::get('/reviews', [App\Http\Controllers\Api\ReviewController::class, 'index']);
     Route::get('/services/{service}/reviews', [App\Http\Controllers\Api\ReviewController::class, 'serviceReviews']);
@@ -139,6 +143,10 @@ Route::middleware('auth:sanctum')->prefix('protected')->group(function () {
     Route::apiResource('services', App\Http\Controllers\Api\ServiceController::class)->except(['index', 'show']);
     Route::apiResource('providers', App\Http\Controllers\Api\ProviderController::class)->except(['index', 'show']);
     Route::apiResource('reviews', App\Http\Controllers\Api\ReviewController::class)->only(['store', 'update', 'destroy']);
+    
+    // Missions et avis pour prestataires officiels
+    Route::post('/missions', [App\Http\Controllers\Api\OfficialProviderController::class, 'createMission']);
+    Route::post('/service-reviews', [App\Http\Controllers\Api\OfficialProviderController::class, 'addReview']);
 });
 
 // Routes Profil Utilisateur
