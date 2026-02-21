@@ -63,6 +63,10 @@ export default function HomePage() {
               <Link href="/prestataires" className="text-gray-700 hover:text-blue-600 transition-colors">
                 Prestataires
               </Link>
+              <Link href="/prestataires-officiels" className="flex items-center text-gray-700 hover:text-blue-600 transition-colors">
+                <Shield className="w-4 h-4 mr-1" />
+                Officiels
+              </Link>
               <a href="#about" className="text-gray-700 hover:text-blue-600 transition-colors">
                 À propos
               </a>
@@ -108,6 +112,14 @@ export default function HomePage() {
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Prestataires
+              </Link>
+              <Link 
+                href="/prestataires-officiels" 
+                className="block py-2 text-gray-700 hover:text-blue-600 transition-colors flex items-center"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <Shield className="w-4 h-4 mr-2" />
+                Prestataires Officiels
               </Link>
               <a 
                 href="#about" 
