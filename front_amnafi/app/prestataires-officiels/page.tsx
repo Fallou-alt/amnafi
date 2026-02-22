@@ -429,10 +429,44 @@ export default function OfficialProviders() {
                     Annuler
                   </button>
                   <button
-                    onClick={() => {
-                      alert('Mission envoyée avec succès!');
-                      setShowMissionModal(false);
-                      setMissionForm({ title: '', description: '', location: '', preferred_date: '', budget: '' });
+                    onClick={async () => {
+                      if (!missionForm.title || !missionForm.description || !missionForm.location) {
+                        alert('Veuillez remplir tous les champs obligatoires');
+                        return;
+                      }
+                      
+                      try {
+                        const token = localStorage.getItem('token');
+                        if (!token) {
+                          alert('Vous devez être connecté pour demander une mission');
+                          return;
+                        }
+
+                        const response = await fetch('http://localhost:8000/api/protected/missions', {
+                          method: 'POST',
+                          headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                          },
+                          body: JSON.stringify({
+                            provider_id: selectedProvider.id,
+                            ...missionForm
+                          })
+                        });
+
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                          alert('Mission envoyée avec succès!');
+                          setShowMissionModal(false);
+                          setMissionForm({ title: '', description: '', location: '', preferred_date: '', budget: '' });
+                        } else {
+                          alert(data.message || 'Erreur lors de l\'envoi de la mission');
+                        }
+                      } catch (error) {
+                        console.error('Erreur:', error);
+                        alert('Erreur lors de l\'envoi de la mission');
+                      }
                     }}
                     className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all font-semibold flex items-center justify-center gap-2 shadow-lg"
                   >
@@ -526,10 +560,46 @@ export default function OfficialProviders() {
                     Annuler
                   </button>
                   <button
-                    onClick={() => {
-                      alert('Avis envoyé avec succès!');
-                      setShowReviewModal(false);
-                      setReviewForm({ rating: 5, comment: '' });
+                    onClick={async () => {
+                      if (!reviewForm.rating) {
+                        alert('Veuillez sélectionner une note');
+                        return;
+                      }
+                      
+                      try {
+                        const token = localStorage.getItem('token');
+                        if (!token) {
+                          alert('Vous devez être connecté pour noter un prestataire');
+                          return;
+                        }
+
+                        const response = await fetch('http://localhost:8000/api/protected/service-reviews', {
+                          method: 'POST',
+                          headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                          },
+                          body: JSON.stringify({
+                            provider_id: selectedProvider.id,
+                            rating: reviewForm.rating,
+                            comment: reviewForm.comment
+                          })
+                        });
+
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                          alert('Avis envoyé avec succès!');
+                          setShowReviewModal(false);
+                          setReviewForm({ rating: 5, comment: '' });
+                          fetchProviders(selectedCategory, filterPartner);
+                        } else {
+                          alert(data.message || 'Erreur lors de l\'envoi de l\'avis');
+                        }
+                      } catch (error) {
+                        console.error('Erreur:', error);
+                        alert('Erreur lors de l\'envoi de l\'avis');
+                      }
                     }}
                     className="flex-1 px-6 py-3 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-xl hover:from-yellow-600 hover:to-orange-600 transition-all font-semibold flex items-center justify-center gap-2 shadow-lg"
                   >
