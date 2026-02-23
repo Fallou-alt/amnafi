@@ -263,12 +263,19 @@ export default function OfficialProviders() {
                   </div>
 
                   <div className="space-y-2">
+                    <Link
+                      href={`/prestataires-officiels/${provider.id}`}
+                      className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-2.5 px-4 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg font-semibold text-sm flex items-center justify-center gap-2"
+                    >
+                      <Shield className="w-4 h-4" />
+                      Voir le profil
+                    </Link>
                     <button
                       onClick={() => {
                         setSelectedProvider(provider);
                         setShowMissionModal(true);
                       }}
-                      className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-2.5 px-4 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg font-semibold text-sm flex items-center justify-center gap-2"
+                      className="w-full bg-gradient-to-r from-orange-600 to-red-600 text-white py-2.5 px-4 rounded-xl hover:from-orange-700 hover:to-red-700 transition-all shadow-lg font-semibold text-sm flex items-center justify-center gap-2"
                     >
                       <FileText className="w-4 h-4" />
                       Demander une mission
@@ -417,7 +424,7 @@ export default function OfficialProviders() {
 
                 <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-4">
                   <p className="text-sm text-blue-800">
-                    <strong>Note:</strong> Le prestataire recevra votre demande et vous contactera dans les plus brefs délais.
+                    <strong>Note:</strong> Votre demande sera examinée par l'équipe AMNAFI qui assignera un prestataire officiel qualifié. L'entreprise paie AMNAFI qui rémunère ensuite le prestataire.
                   </p>
                 </div>
 

@@ -63,6 +63,15 @@ Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->group(function ()
     Route::post('/providers/{id}/note', [App\Http\Controllers\Admin\ProviderController::class, 'addNote']);
     Route::put('/providers/{id}', [App\Http\Controllers\Admin\ProviderController::class, 'update']);
     Route::delete('/providers/{id}', [App\Http\Controllers\Admin\ProviderController::class, 'destroy']);
+    
+    // Gestion missions officielles
+    Route::get('/missions', [App\Http\Controllers\Admin\MissionController::class, 'index']);
+    Route::get('/missions/stats', [App\Http\Controllers\Admin\MissionController::class, 'stats']);
+    Route::get('/missions/{id}', [App\Http\Controllers\Admin\MissionController::class, 'show']);
+    Route::post('/missions/{id}/approve', [App\Http\Controllers\Admin\MissionController::class, 'approve']);
+    Route::post('/missions/{id}/assign', [App\Http\Controllers\Admin\MissionController::class, 'assignProvider']);
+    Route::post('/missions/{id}/reject', [App\Http\Controllers\Admin\MissionController::class, 'reject']);
+    Route::post('/missions/{id}/complete', [App\Http\Controllers\Admin\MissionController::class, 'complete']);
 });
 
     // Routes pour devenir prestataire
