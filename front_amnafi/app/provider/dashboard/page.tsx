@@ -8,10 +8,36 @@ import { User, Settings, LogOut, Crown, Calendar, CheckCircle, Loader2 } from 'l
 
 const API_URL = 'http://localhost:8000/api';
 
+type Provider = {
+  profile_photo?: string;
+  business_name?: string;
+  is_verified?: boolean;
+  subscription_type?: string;
+  is_premium?: boolean;
+  rating?: string;
+  reviews_count?: number;
+  subscription_expires_at?: string;
+  city?: string;
+  category?: {
+    name?: string;
+  };
+};
+
+type UserData = {
+  name?: string;
+  email?: string;
+  phone?: string;
+};
+
+type Profile = {
+  provider?: Provider;
+  user?: UserData;
+};
+
 export default function ProviderDashboard() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [profile, setProfile] = useState(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
 
   useEffect(() => {
     fetchProfile();
@@ -33,8 +59,11 @@ export default function ProviderDashboard() {
       setLoading(false);
     } catch (error) {
       console.error('Erreur:', error);
-      if (error.response?.status === 401) {
-        router.push('/provider/login');
+      if (error instanceof Error && 'response' in error) {
+        const axiosError = error as any;
+        if (axiosError.response?.status === 401) {
+          router.push('/provider/login');
+        }
       }
       setLoading(false);
     }

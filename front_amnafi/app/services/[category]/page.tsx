@@ -112,9 +112,9 @@ export default function CategoryProviders() {
                   <div className="flex items-center space-x-3">
                     <div className="relative">
                       <div className="w-12 h-12 bg-gray-200 rounded-full overflow-hidden">
-                        {provider.profile_photo ? (
+                        {provider.profile_photo_url ? (
                           <img
-                            src={`http://localhost:8000/storage/${provider.profile_photo}`}
+                            src={`http://localhost:8000/storage/${provider.profile_photo_url}`}
                             alt={provider.business_name}
                             className="w-full h-full object-cover"
                           />

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
-import { User, Building2, Mail, Phone, MapPin, Globe, Lock, Camera, Save, Loader2, LogOut, ArrowLeft, MapOff, Trash2, AlertTriangle } from 'lucide-react';
+import { User, Building2, Mail, Phone, MapPin, Globe, Lock, Camera, Save, Loader2, LogOut, ArrowLeft, Trash2, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 
 const API_URL = 'http://localhost:8000/api';
@@ -12,7 +12,7 @@ export default function ProviderProfile() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [categories, setCategories] = useState([]);
+  const [categories, setCategories] = useState<any[]>([]);
   const [profile, setProfile] = useState({
     name: '',
     email: '',
@@ -76,7 +76,7 @@ export default function ProviderProfile() {
         geolocation_enabled: data.provider?.geolocation_enabled !== false
       });
       setLoading(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erreur:', error);
       if (error.response?.status === 401) {
         router.push('/provider/login');
@@ -89,7 +89,7 @@ export default function ProviderProfile() {
     try {
       const response = await axios.get(`${API_URL}/public/categories-for-registration`);
       setCategories(response.data.data || []);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erreur chargement catégories:', error);
     }
   };
@@ -101,7 +101,7 @@ export default function ProviderProfile() {
     router.push('/provider/login');
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     setMessage({ type: '', text: '' });
@@ -114,7 +114,7 @@ export default function ProviderProfile() {
 
       setMessage({ type: 'success', text: 'Profil mis à jour avec succès !' });
       setTimeout(() => setMessage({ type: '', text: '' }), 3000);
-    } catch (error) {
+    } catch (error: any) {
       setMessage({ 
         type: 'error', 
         text: error.response?.data?.message || 'Erreur lors de la mise à jour' 
@@ -124,7 +124,7 @@ export default function ProviderProfile() {
     }
   };
 
-  const handlePasswordChange = async (e) => {
+  const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     setMessage({ type: '', text: '' });
@@ -138,7 +138,7 @@ export default function ProviderProfile() {
       setMessage({ type: 'success', text: 'Mot de passe modifié avec succès !' });
       setPasswordData({ current_password: '', new_password: '', new_password_confirmation: '' });
       setTimeout(() => setMessage({ type: '', text: '' }), 3000);
-    } catch (error) {
+    } catch (error: any) {
       setMessage({ 
         type: 'error', 
         text: error.response?.data?.message || 'Erreur lors du changement de mot de passe' 
@@ -148,8 +148,8 @@ export default function ProviderProfile() {
     }
   };
 
-  const handlePhotoUpload = async (e, type) => {
-    const file = e.target.files[0];
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: string) => {
+    const file = e.target.files?.[0];
     if (!file) return;
 
     const formData = new FormData();
@@ -172,7 +172,7 @@ export default function ProviderProfile() {
 
       setMessage({ type: 'success', text: 'Photo mise à jour avec succès !' });
       setTimeout(() => setMessage({ type: '', text: '' }), 3000);
-    } catch (error) {
+    } catch (error: any) {
       setMessage({ type: 'error', text: 'Erreur lors de l\'upload de la photo' });
     }
   };
@@ -188,7 +188,7 @@ export default function ProviderProfile() {
       localStorage.removeItem('user');
       localStorage.removeItem('provider');
       router.push('/');
-    } catch (error) {
+    } catch (error: any) {
       setMessage({ 
         type: 'error', 
         text: error.response?.data?.message || 'Erreur lors de la suppression du compte' 
@@ -213,7 +213,7 @@ export default function ProviderProfile() {
         text: `Géolocalisation ${newValue ? 'activée' : 'désactivée'} avec succès !` 
       });
       setTimeout(() => setMessage({ type: '', text: '' }), 3000);
-    } catch (error) {
+    } catch (error: any) {
       setMessage({ 
         type: 'error', 
         text: 'Erreur lors de la modification de la géolocalisation' 

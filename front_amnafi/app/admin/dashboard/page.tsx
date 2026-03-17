@@ -131,7 +131,7 @@ export default function AdminDashboard() {
       {/* Quick Actions */}
       <div className="bg-white rounded-lg shadow-md p-6">
         <h2 className="text-xl font-semibold text-gray-900 mb-4">Actions Rapides</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <a
             href="/admin/prestataires"
             className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
@@ -140,6 +140,28 @@ export default function AdminDashboard() {
             <div>
               <p className="font-medium text-gray-900">Gérer les Prestataires</p>
               <p className="text-sm text-gray-600">Activer, désactiver, modifier</p>
+            </div>
+          </a>
+          
+          <a
+            href="/joj/admin/providers"
+            className="flex items-center p-4 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors bg-gradient-to-r from-blue-50 to-purple-50"
+          >
+            <span className="text-2xl mr-3">🏅</span>
+            <div>
+              <p className="font-medium text-blue-900">Prestataires JOJ 2026</p>
+              <p className="text-sm text-blue-600">Gérer les prestataires officiels</p>
+            </div>
+          </a>
+          
+          <a
+            href="/joj/admin/missions"
+            className="flex items-center p-4 border border-purple-200 rounded-lg hover:bg-purple-50 transition-colors bg-gradient-to-r from-purple-50 to-pink-50"
+          >
+            <span className="text-2xl mr-3">📋</span>
+            <div>
+              <p className="font-medium text-purple-900">Missions JOJ</p>
+              <p className="text-sm text-purple-600">Valider et assigner les missions</p>
             </div>
           </a>
           

@@ -10,7 +10,7 @@ export default function HomePage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
-  const [categories, setCategories] = useState([]);
+  const [categories, setCategories] = useState<any[]>([]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -63,9 +63,9 @@ export default function HomePage() {
               <Link href="/prestataires" className="text-gray-700 hover:text-blue-600 transition-colors">
                 Prestataires
               </Link>
-              <Link href="/prestataires-officiels" className="flex items-center text-gray-700 hover:text-blue-600 transition-colors">
+              <Link href="/joj/official-providers" className="flex items-center text-gray-700 hover:text-blue-600 transition-colors">
                 <Shield className="w-4 h-4 mr-1" />
-                Officiels
+                Officiels JOJ
               </Link>
               <a href="#about" className="text-gray-700 hover:text-blue-600 transition-colors">
                 À propos
@@ -114,12 +114,12 @@ export default function HomePage() {
                 Prestataires
               </Link>
               <Link 
-                href="/prestataires-officiels" 
+                href="/joj/official-providers" 
                 className="block py-2 text-gray-700 hover:text-blue-600 transition-colors flex items-center"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 <Shield className="w-4 h-4 mr-2" />
-                Prestataires Officiels
+                Prestataires Officiels JOJ
               </Link>
               <a 
                 href="#about" 

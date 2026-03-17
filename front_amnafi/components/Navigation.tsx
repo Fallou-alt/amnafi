@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { User, LogOut, Settings } from 'lucide-react';
 
 export default function Navigation() {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<any>(null);
   const [isProvider, setIsProvider] = useState(false);
 
   useEffect(() => {

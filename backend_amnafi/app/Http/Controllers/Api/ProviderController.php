@@ -15,6 +15,7 @@ class ProviderController extends Controller
         
         $providers = Cache::remember($cacheKey, 300, function () use ($request) {
             $query = Provider::where('is_active', true)
+                ->where('is_hidden', false)
                 ->with(['user:id,name,phone', 'category:id,name,icon,color']);
 
             if ($request->has('search')) {
@@ -75,7 +76,7 @@ class ProviderController extends Controller
 
     public function show(Provider $provider)
     {
-        if (!$provider->is_active) {
+        if (!$provider->is_active || $provider->is_hidden) {
             return response()->json([
                 'success' => false,
                 'message' => 'Provider not found'
@@ -106,6 +107,7 @@ class ProviderController extends Controller
     public function verified()
     {
         $providers = Provider::where('is_active', true)
+            ->where('is_hidden', false)
             ->where('is_verified', true)
             ->with(['user', 'activeServices', 'category'])
             ->orderBy('rating', 'desc')
@@ -130,6 +132,7 @@ class ProviderController extends Controller
     public function topRated()
     {
         $providers = Provider::where('is_active', true)
+            ->where('is_hidden', false)
             ->where('reviews_count', '>=', 3)
             ->with(['user', 'activeServices', 'category'])
             ->orderBy('rating', 'desc')
@@ -155,6 +158,7 @@ class ProviderController extends Controller
     public function byCategory($categoryId)
     {
         $providers = Provider::where('is_active', true)
+            ->where('is_hidden', false)
             ->where('category_id', $categoryId)
             ->with(['user', 'category'])
             ->orderBy('is_premium', 'desc')
@@ -162,7 +166,6 @@ class ProviderController extends Controller
             ->orderBy('rating', 'desc')
             ->get();
 
-        // Ajouter les URLs et informations supplémentaires
         $providers->transform(function ($provider) {
             $provider->profile_photo_url = $provider->profile_photo ? 
                 url('storage/' . $provider->profile_photo) : null;
@@ -270,16 +273,16 @@ class ProviderController extends Controller
         $categoryId = $request->get('category_id');
         
         $providersQuery = Provider::where('is_active', true)
+            ->where('is_hidden', false)
             ->with(['user', 'category']);
         
         $servicesQuery = Service::where('is_active', true)
             ->with(['category', 'provider.category']);
         
         if ($search) {
-            // Recherche intelligente avec tri par pertinence
             $providersQuery->where(function ($q) use ($search) {
-                $q->where('business_name', 'LIKE', "{$search}%") // Commence par
-                  ->orWhere('business_name', 'LIKE', "%{$search}%") // Contient
+                $q->where('business_name', 'LIKE', "{$search}%")
+                  ->orWhere('business_name', 'LIKE', "%{$search}%")
                   ->orWhere('description', 'LIKE', "{$search}%")
                   ->orWhere('description', 'LIKE', "%{$search}%")
                   ->orWhereHas('category', function($categoryQuery) use ($search) {
@@ -327,7 +330,6 @@ class ProviderController extends Controller
             ->limit(20)
             ->get();
         
-        // Ajouter les URLs
         $providers->transform(function ($provider) {
             $provider->profile_photo_url = $provider->profile_photo ? 
                 url('storage/' . $provider->profile_photo) : null;
@@ -346,7 +348,6 @@ class ProviderController extends Controller
             return $service;
         });
         
-        // Vérifier si aucun résultat trouvé
         $noResults = $providers->isEmpty() && $services->isEmpty() && !empty($search);
         
         return response()->json([

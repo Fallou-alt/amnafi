@@ -254,7 +254,7 @@ Route::prefix('premium')->group(function () {
 
 // Routes admin publiques temporaires (pour test)
 Route::prefix('debug/admin')->group(function () {
-    Route::patch('/providers/{id}/toggle-status', function($id) {
+    Route::post('/providers/{id}/toggle-status', function($id) {
         $provider = \App\Models\Provider::findOrFail($id);
         $provider->update(['is_active' => !$provider->is_active]);
         return response()->json([
@@ -264,7 +264,7 @@ Route::prefix('debug/admin')->group(function () {
         ]);
     });
     
-    Route::patch('/providers/{id}/toggle-premium', function($id) {
+    Route::post('/providers/{id}/toggle-premium', function($id) {
         $provider = \App\Models\Provider::findOrFail($id);
         $provider->update(['is_premium' => !$provider->is_premium]);
         return response()->json([
@@ -274,7 +274,7 @@ Route::prefix('debug/admin')->group(function () {
         ]);
     });
     
-    Route::patch('/providers/{id}/hide', function($id) {
+    Route::post('/providers/{id}/hide', function($id) {
         $provider = \App\Models\Provider::findOrFail($id);
         $provider->update(['is_hidden' => !($provider->is_hidden ?? false)]);
         return response()->json([
@@ -284,7 +284,7 @@ Route::prefix('debug/admin')->group(function () {
         ]);
     });
     
-    Route::patch('/providers/{id}/lock', function(\Illuminate\Http\Request $request, $id) {
+    Route::post('/providers/{id}/lock', function(\Illuminate\Http\Request $request, $id) {
         $provider = \App\Models\Provider::findOrFail($id);
         $provider->update([
             'is_locked' => true,
@@ -298,7 +298,7 @@ Route::prefix('debug/admin')->group(function () {
         ]);
     });
     
-    Route::patch('/providers/{id}/unlock', function($id) {
+    Route::post('/providers/{id}/unlock', function($id) {
         $provider = \App\Models\Provider::findOrFail($id);
         $provider->update([
             'is_locked' => false,
@@ -352,5 +352,34 @@ Route::prefix('debug/admin')->group(function () {
                 ];
             })
         ]);
+    });
+});
+
+// ========================================
+// Routes JOJ - Prestataires Officiels
+// ========================================
+Route::prefix('joj')->group(function () {
+    // Public (Touristes via QR Code)
+    Route::get('official-providers', [App\Http\Controllers\Api\JOJ\OfficialProviderController::class, 'index']);
+    Route::get('official-providers/{id}', [App\Http\Controllers\Api\JOJ\OfficialProviderController::class, 'show']);
+    
+    // Touristes authentifiés
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post('missions', [App\Http\Controllers\Api\JOJ\MissionController::class, 'store']);
+        Route::get('missions', [App\Http\Controllers\Api\JOJ\MissionController::class, 'index']);
+        Route::get('missions/{id}', [App\Http\Controllers\Api\JOJ\MissionController::class, 'show']);
+    });
+
+    // Admin uniquement
+    Route::prefix('admin')->middleware(['auth:sanctum', App\Http\Middleware\AdminOnly::class])->group(function () {
+        Route::get('official-providers', [App\Http\Controllers\Api\JOJ\AdminProviderController::class, 'index']);
+        Route::post('official-providers', [App\Http\Controllers\Api\JOJ\AdminProviderController::class, 'store']);
+        Route::post('official-providers/{id}', [App\Http\Controllers\Api\JOJ\AdminProviderController::class, 'update']);
+        Route::delete('official-providers/{id}', [App\Http\Controllers\Api\JOJ\AdminProviderController::class, 'destroy']);
+        Route::post('official-providers/{id}/toggle-status', [App\Http\Controllers\Api\JOJ\AdminProviderController::class, 'toggleStatus']);
+        Route::get('missions', [App\Http\Controllers\Api\JOJ\AdminMissionController::class, 'index']);
+        Route::post('missions/{id}/validate', [App\Http\Controllers\Api\JOJ\AdminMissionController::class, 'validate']);
+        Route::post('missions/{id}/assign', [App\Http\Controllers\Api\JOJ\AdminMissionController::class, 'assign']);
+        Route::post('missions/{id}/cancel', [App\Http\Controllers\Api\JOJ\AdminMissionController::class, 'cancel']);
     });
 });

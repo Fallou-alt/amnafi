@@ -10,8 +10,21 @@ export default function ProviderRegistrationPage() {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [categories, setCategories] = useState([]);
-  const [formData, setFormData] = useState({
+  const [categories, setCategories] = useState<any[]>([]);
+  const [formData, setFormData] = useState<{
+    first_name: string;
+    last_name: string;
+    phone: string;
+    email: string;
+    business_name: string;
+    profession: string;
+    category_id: string;
+    city: string;
+    description: string;
+    profile_photo: File | null;
+    subscription_type: string;
+    age_confirmed: boolean;
+  }>({
     first_name: '',
     last_name: '',
     phone: '',
@@ -26,7 +39,7 @@ export default function ProviderRegistrationPage() {
     age_confirmed: false
   });
 
-  const [paymentData, setPaymentData] = useState(null);
+  const [paymentData, setPaymentData] = useState<any>(null);
 
   useEffect(() => {
     fetchCategories();
@@ -36,18 +49,18 @@ export default function ProviderRegistrationPage() {
     try {
       const response = await axios.get(`${API_URL}/public/categories-for-registration`);
       setCategories(response.data.data || []);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erreur chargement catégories:', error);
     }
   };
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleFileChange = (e) => {
-    setFormData(prev => ({ ...prev, profile_photo: e.target.files[0] }));
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData(prev => ({ ...prev, profile_photo: e.target.files?.[0] || null }));
   };
 
   const handleSubmit = async () => {
@@ -77,9 +90,10 @@ export default function ProviderRegistrationPage() {
       data.append('subscription_type', formData.subscription_type);
 
       console.log('=== FormData prêt à envoyer ===');
-      for (let pair of data.entries()) {
-        console.log(pair[0] + ':', pair[1]);
-      }
+      // Debug FormData
+      data.forEach((value, key) => {
+        console.log(key + ':', value);
+      });
 
       const response = await axios.post(`${API_URL}/provider/register`, data, {
         headers: { 'Content-Type': 'multipart/form-data' }
@@ -96,7 +110,7 @@ export default function ProviderRegistrationPage() {
           router.push('/provider/dashboard');
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erreur complète:', error);
       const errorMsg = error.response?.data?.message || 'Erreur lors de l\'inscription';
       const errors = error.response?.data?.errors;
@@ -123,7 +137,7 @@ export default function ProviderRegistrationPage() {
       if (response.data.success && response.data.payment_url) {
         window.location.href = response.data.payment_url;
       }
-    } catch (error) {
+    } catch (error: any) {
       alert('Erreur lors de l\'initialisation du paiement');
     } finally {
       setLoading(false);

@@ -127,11 +127,11 @@ export default function InscriptionPrestataire() {
     category_id: '',
     ville: '',
     quartier: '',
-    photo: null,
+    photo: null as File | null,
     statut: 'gratuit'
   });
   
-  const [categories, setCategories] = useState([]);
+  const [categories, setCategories] = useState<any[]>([]);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -310,12 +310,17 @@ export default function InscriptionPrestataire() {
       }
     } catch (error) {
       console.error('💥 Erreur complète:', error);
-      console.error('Stack trace:', error.stack);
       
-      if (error.name === 'TypeError' && error.message.includes('fetch')) {
-        alert('Erreur de connexion: Impossible de joindre le serveur. Vérifiez que l\'API Laravel est démarrée sur http://localhost:8000');
+      if (error instanceof Error) {
+        console.error('Stack trace:', error.stack);
+        
+        if (error.name === 'TypeError' && error.message.includes('fetch')) {
+          alert('Erreur de connexion: Impossible de joindre le serveur. Vérifiez que l\'API Laravel est démarrée sur http://localhost:8000');
+        } else {
+          alert('Erreur de connexion: ' + error.message);
+        }
       } else {
-        alert('Erreur de connexion: ' + error.message);
+        alert('Erreur de connexion inconnue');
       }
     } finally {
       setIsSubmitting(false);
@@ -323,47 +328,50 @@ export default function InscriptionPrestataire() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-red-50">
       {/* Navigation */}
-      <nav className="bg-white shadow-lg">
+      <nav className="bg-white/90 backdrop-blur-md shadow-xl border-b border-orange-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <Link href="/" className="flex items-center space-x-3">
+            <Link href="/" className="flex items-center space-x-3 group">
               <Image
                 src="/images/1logoamnafi.png"
                 alt="AMNAFI"
                 width={40}
                 height={40}
-                className="w-10 h-10"
+                className="w-10 h-10 transform group-hover:scale-110 transition-transform"
               />
-              <span className="text-2xl font-bold text-orange-600">AMNAFI</span>
+              <span className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">AMNAFI</span>
             </Link>
-            <Link href="/" className="text-gray-600 hover:text-orange-600">
+            <Link href="/" className="text-gray-600 hover:text-orange-600 font-medium transition-colors">
               ← Retour à l'accueil
             </Link>
           </div>
         </div>
       </nav>
 
-      <div className="max-w-4xl mx-auto px-4 py-12">
+      <div className="max-w-3xl mx-auto px-4 py-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-2xl shadow-xl overflow-hidden"
+          className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl overflow-hidden border-2 border-orange-100"
         >
           {/* Header */}
-          <div className="bg-gradient-to-r from-orange-600 to-red-500 px-8 py-6">
-            <h1 className="text-3xl font-bold text-white">Devenir Prestataire</h1>
-            <p className="text-orange-100 mt-2">Rejoignez notre réseau de professionnels au Sénégal</p>
+          <div className="bg-gradient-to-r from-orange-600 via-red-500 to-orange-600 px-6 py-6 relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"></div>
+            <div className="relative">
+              <h1 className="text-3xl font-bold text-white mb-1">Devenir Prestataire</h1>
+              <p className="text-orange-50">Rejoignez notre réseau de professionnels au Sénégal</p>
+            </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="p-8 space-y-6">
+          <form onSubmit={handleSubmit} className="p-6 space-y-6">
             {/* Photo de profil obligatoire */}
-            <div className="text-center">
+            <div className="text-center bg-gradient-to-br from-orange-50 to-red-50 p-4 rounded-2xl">
               <div className="relative inline-block">
                 {photoPreview ? (
                   <div className="relative">
-                    <div className="w-32 h-32 rounded-full overflow-hidden mx-auto mb-4 border-4 border-orange-200">
+                    <div className="w-32 h-32 rounded-full overflow-hidden mx-auto mb-3 border-4 border-orange-300 shadow-xl ring-4 ring-orange-100">
                       <Image
                         src={photoPreview}
                         alt="Aperçu photo"
@@ -375,17 +383,17 @@ export default function InscriptionPrestataire() {
                     <button
                       type="button"
                       onClick={removePhoto}
-                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                      className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-2 hover:bg-red-600 shadow-lg transform hover:scale-110 transition-all"
                     >
-                      <X className="w-4 h-4" />
+                      <X className="w-5 h-5" />
                     </button>
                   </div>
                 ) : (
-                  <div className="w-32 h-32 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-dashed border-gray-300 hover:border-orange-400 transition-colors cursor-pointer"
+                  <div className="w-32 h-32 bg-gradient-to-br from-orange-100 to-red-100 rounded-full flex items-center justify-center mx-auto mb-3 border-4 border-dashed border-orange-300 hover:border-orange-500 transition-all cursor-pointer shadow-lg hover:shadow-xl transform hover:scale-105"
                        onClick={() => fileInputRef.current?.click()}>
                     <div className="text-center">
-                      <Camera className="w-8 h-8 text-gray-400 mx-auto mb-1" />
-                      <Upload className="w-4 h-4 text-gray-400 mx-auto" />
+                      <Camera className="w-10 h-10 text-orange-500 mx-auto mb-1" />
+                      <Upload className="w-5 h-5 text-orange-400 mx-auto" />
                     </div>
                   </div>
                 )}
@@ -398,10 +406,10 @@ export default function InscriptionPrestataire() {
                   required
                 />
               </div>
-              <p className="text-sm text-gray-600 mb-2">
+              <p className="text-sm font-semibold text-gray-700 mb-1">
                 <span className="text-red-500">*</span> Photo de profil obligatoire
               </p>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-600">
                 Formats acceptés: JPG, PNG, GIF, WEBP (max 10MB)
               </p>
             </div>
@@ -571,13 +579,13 @@ export default function InscriptionPrestataire() {
               whileTap={{ scale: isSubmitting ? 1 : 0.98 }}
               type="submit"
               disabled={isSubmitting || !formData.photo}
-              className={`w-full py-4 px-6 rounded-lg font-semibold text-lg transition-all ${
+              className={`w-full py-4 px-6 rounded-xl font-bold text-lg transition-all shadow-xl ${
                 isSubmitting || !formData.photo
                   ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-orange-600 to-red-500 hover:shadow-lg'
+                  : 'bg-gradient-to-r from-orange-600 via-red-500 to-orange-600 hover:shadow-2xl hover:scale-105'
               } text-white`}
             >
-              {isSubmitting ? 'Inscription en cours...' : 'Créer mon profil prestataire'}
+              {isSubmitting ? 'Inscription en cours...' : '🚀 Créer mon profil prestataire'}
             </motion.button>
           </form>
         </motion.div>

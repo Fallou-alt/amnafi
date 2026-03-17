@@ -35,7 +35,10 @@ export default function AdminProviders() {
   const [lockForm, setLockForm] = useState({duration: 7, reason: ''});
 
   useEffect(() => {
-    fetchProviders();
+    const delaySearch = setTimeout(() => {
+      fetchProviders();
+    }, 300);
+    return () => clearTimeout(delaySearch);
   }, [search, statusFilter, typeFilter]);
 
   const fetchProviders = async () => {
@@ -106,7 +109,11 @@ export default function AdminProviders() {
       console.log('📡 URL:', url);
       
       const response = await fetch(url, {
-        method: 'PATCH'
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
       });
 
       console.log('📊 Response status:', response.status);
@@ -130,7 +137,11 @@ export default function AdminProviders() {
   const togglePremium = async (id: number) => {
     try {
       const response = await fetch(`http://localhost:8000/api/debug/admin/providers/${id}/toggle-premium`, {
-        method: 'PATCH'
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
       });
 
       if (response.ok) {
@@ -153,7 +164,7 @@ export default function AdminProviders() {
   const hideProvider = async (id: number) => {
     try {
       const response = await fetch(`http://localhost:8000/api/debug/admin/providers/${id}/hide`, {
-        method: 'PATCH'
+        method: 'POST'
       });
 
       if (response.ok) {
@@ -182,7 +193,7 @@ export default function AdminProviders() {
         : `http://localhost:8000/api/debug/admin/providers/${lockModal.providerId}/lock`;
         
       const response = await fetch(url, {
-        method: 'PATCH',
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },

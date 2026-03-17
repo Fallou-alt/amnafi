@@ -22,7 +22,7 @@ export default function PaymentSuccessPage() {
     }
   }, [searchParams]);
 
-  const verifyPayment = async (token) => {
+  const verifyPayment = async (token: string) => {
     try {
       const response = await axios.get(`${API_URL}/premium/verify/${token}`);
       

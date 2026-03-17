@@ -101,35 +101,40 @@ export default function ChatBot() {
       {/* Bouton flottant */}
       <button
         onClick={() => setIsOpen(true)}
-        className={`fixed bottom-6 right-6 z-50 bg-orange-600 hover:bg-orange-700 text-white p-4 rounded-full shadow-lg transition-all duration-300 ${
+        className={`fixed bottom-6 right-6 z-50 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white p-5 rounded-full shadow-2xl transition-all duration-300 transform hover:scale-110 ${
           isOpen ? 'scale-0' : 'scale-100'
         }`}
       >
-        <MessageCircle className="w-6 h-6" />
+        <MessageCircle className="w-7 h-7" />
       </button>
 
       {/* Fenêtre de chat */}
       <div
-        className={`fixed bottom-6 right-6 z-50 w-96 h-[500px] bg-white rounded-lg shadow-2xl border transition-all duration-300 ${
+        className={`fixed bottom-6 right-6 z-50 w-[420px] h-[600px] bg-white rounded-2xl shadow-2xl border-2 border-orange-200 transition-all duration-300 flex flex-col ${
           isOpen ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
         }`}
       >
         {/* Header */}
-        <div className="bg-orange-600 text-white p-4 rounded-t-lg flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Bot className="w-5 h-5" />
-            <span className="font-semibold">Jamila - Assistant AMNAFI</span>
+        <div className="bg-gradient-to-r from-orange-600 via-red-500 to-orange-600 text-white p-5 rounded-t-2xl flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+              <Bot className="w-6 h-6" />
+            </div>
+            <div>
+              <span className="font-bold text-lg block">Jamila</span>
+              <span className="text-xs text-orange-100">Assistant AMNAFI</span>
+            </div>
           </div>
           <button
             onClick={() => setIsOpen(false)}
-            className="hover:bg-orange-700 p-1 rounded"
+            className="hover:bg-white/20 p-2 rounded-full transition-colors"
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Messages */}
-        <div className="flex-1 p-4 h-80 overflow-y-auto space-y-4">
+        <div className="flex-1 p-5 overflow-y-auto space-y-4 bg-gradient-to-br from-orange-50/30 to-red-50/30">
           {messages.map((message) => (
             <div
               key={message.id}
@@ -138,24 +143,34 @@ export default function ChatBot() {
               }`}
             >
               {message.role === 'assistant' && (
-                <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  <Bot className="w-4 h-4 text-orange-600" />
+                <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg">
+                  <Bot className="w-5 h-5 text-white" />
                 </div>
               )}
               
               <div
-                className={`max-w-xs px-3 py-2 rounded-lg text-sm whitespace-pre-wrap ${
+                className={`max-w-xs px-4 py-3 rounded-2xl text-sm whitespace-pre-wrap shadow-md ${
                   message.role === 'user'
-                    ? 'bg-orange-600 text-white'
-                    : 'bg-gray-100 text-gray-800'
+                    ? 'bg-gradient-to-r from-orange-600 to-red-600 text-white'
+                    : 'bg-white text-gray-800 border border-gray-200'
                 }`}
               >
                 {message.content}
+                
+                {/* Bouton d'action si le message contient un lien vers /prestataire */}
+                {message.role === 'assistant' && message.content.includes('/prestataire') && (
+                  <a
+                    href="/prestataire"
+                    className="mt-3 block w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white text-center py-2 px-4 rounded-lg font-semibold transition-all shadow-md hover:shadow-lg"
+                  >
+                    🚀 S'inscrire maintenant
+                  </a>
+                )}
               </div>
               
               {message.role === 'user' && (
-                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  <User className="w-4 h-4 text-blue-600" />
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg">
+                  <User className="w-5 h-5 text-white" />
                 </div>
               )}
             </div>
@@ -163,14 +178,14 @@ export default function ChatBot() {
           
           {isTyping && (
             <div className="flex items-start space-x-2">
-              <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
-                <Bot className="w-4 h-4 text-orange-600" />
+              <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex items-center justify-center shadow-lg">
+                <Bot className="w-5 h-5 text-white" />
               </div>
-              <div className="bg-gray-100 px-3 py-2 rounded-lg">
+              <div className="bg-white border border-gray-200 px-4 py-3 rounded-2xl shadow-md">
                 <div className="flex space-x-1">
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                  <div className="w-2 h-2 bg-orange-500 rounded-full animate-bounce"></div>
+                  <div className="w-2 h-2 bg-orange-500 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                  <div className="w-2 h-2 bg-orange-500 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
                 </div>
               </div>
             </div>
@@ -180,23 +195,23 @@ export default function ChatBot() {
         </div>
 
         {/* Input */}
-        <div className="p-4 border-t">
-          <div className="flex space-x-2">
+        <div className="p-5 border-t-2 border-orange-100 bg-white rounded-b-2xl">
+          <div className="flex space-x-3">
             <input
               type="text"
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Tapez votre message..."
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
+              className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-400 text-sm transition-all"
               disabled={isTyping}
             />
             <button
               onClick={sendMessage}
               disabled={isTyping || !inputMessage.trim()}
-              className="bg-orange-600 hover:bg-orange-700 disabled:bg-gray-400 text-white p-2 rounded-lg transition-colors"
+              className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 disabled:from-gray-400 disabled:to-gray-400 text-white p-3 rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
             >
-              <Send className="w-4 h-4" />
+              <Send className="w-5 h-5" />
             </button>
           </div>
         </div>
