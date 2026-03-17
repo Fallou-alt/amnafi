@@ -50,7 +50,7 @@ export default function OfficialProvidersPage() {
           className="text-center mb-12"
         >
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Prestataires Officiels JOJ Dakar 2026
+            Prestataires Officiel Amnafi
           </h1>
           <p className="text-lg text-gray-600">
             Découvrez nos prestataires certifiés pour les Jeux Olympiques de la Jeunesse

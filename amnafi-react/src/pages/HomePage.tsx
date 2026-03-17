@@ -51,7 +51,7 @@ export default function HomePage() {
               <Link to="/prestataires" className="text-gray-700 hover:text-blue-600 transition-colors">Prestataires</Link>
               <Link to="/joj/official-providers" className="flex items-center text-gray-700 hover:text-blue-600 transition-colors">
                 <Shield className="w-4 h-4 mr-1" />
-                Officiels JOJ
+                Prestataires Officiel Amnafi
               </Link>
               <a href="#about" className="text-gray-700 hover:text-blue-600 transition-colors">À propos</a>
             </div>
@@ -77,7 +77,7 @@ export default function HomePage() {
               <Link to="/prestataires" className="block py-2 text-gray-700 hover:text-blue-600 transition-colors" onClick={() => setMobileMenuOpen(false)}>Prestataires</Link>
               <Link to="/joj/official-providers" className="block py-2 text-gray-700 hover:text-blue-600 transition-colors flex items-center" onClick={() => setMobileMenuOpen(false)}>
                 <Shield className="w-4 h-4 mr-2" />
-                Prestataires Officiels JOJ
+                Prestataires Officiel Amnafi
               </Link>
               <a href="#about" className="block py-2 text-gray-700 hover:text-blue-600 transition-colors" onClick={() => setMobileMenuOpen(false)}>À propos</a>
               <div className="pt-3 border-t border-gray-200 space-y-2">
