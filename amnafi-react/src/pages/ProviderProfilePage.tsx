@@ -15,6 +15,8 @@ interface Provider {
   photo_cin_recto?: string;
   photo_cin_verso?: string;
   photo_patente?: string;
+  profile_photo?: string;
+  profile_photo_url?: string;
   geolocalisation_active: boolean;
   latitude?: number;
   longitude?: number;
@@ -344,9 +346,10 @@ export default function ProviderProfilePage() {
                 
                 {provider?.[field as keyof Provider] && (
                   <img
-                    src={`https://amnafi.net/storage/${provider[field as keyof Provider]}`}
+                    src={`https://amnafi.net/backend/storage/${provider[field as keyof Provider]}`}
                     alt={field}
                     className="w-full h-32 object-cover rounded mb-2"
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                   />
                 )}
                 

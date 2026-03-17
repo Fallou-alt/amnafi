@@ -41,51 +41,18 @@ export default function AdminProviders() {
 
   const fetchProviders = async () => {
     try {
-      let url = '/debug/providers';
+      let url = '/admin/providers';
       
       if (search && search.trim()) {
-        url = `/debug/admin/providers/search?q=${encodeURIComponent(search.trim())}`;
+        url = `/admin/providers?search=${encodeURIComponent(search.trim())}`;
         const response = await api.get(url);
-        setProviders(response.data.data.map((p: any) => ({
-          id: p.id,
-          business_name: p.business_name,
-          phone: p.phone,
-          is_active: p.is_active,
-          is_premium: p.is_premium,
-          is_hidden: p.is_hidden,
-          is_locked: p.is_locked,
-          created_at: p.created_at,
-          user: { name: p.user_name, email: '' },
-          category: { name: p.category_name }
-        })));
+        setProviders(response.data.data || []);
       } else {
-        const response = await api.get(url);
-        let filteredProviders = response.data.data.providers;
-        
-        if (statusFilter === 'active') {
-          filteredProviders = filteredProviders.filter((p: any) => p.is_active);
-        } else if (statusFilter === 'inactive') {
-          filteredProviders = filteredProviders.filter((p: any) => !p.is_active);
-        }
-        
-        if (typeFilter === 'premium') {
-          filteredProviders = filteredProviders.filter((p: any) => p.is_premium);
-        } else if (typeFilter === 'free') {
-          filteredProviders = filteredProviders.filter((p: any) => !p.is_premium);
-        }
-        
-        setProviders(filteredProviders.map((p: any) => ({
-          id: p.id,
-          business_name: p.business_name,
-          phone: p.phone,
-          is_active: p.is_active,
-          is_premium: p.is_premium,
-          is_hidden: p.is_hidden,
-          is_locked: p.is_locked,
-          created_at: p.created_at,
-          user: { name: p.user_name, email: '' },
-          category: { name: p.category_name }
-        })));
+        const params: any = {};
+        if (statusFilter !== 'all') params.status = statusFilter;
+        if (typeFilter !== 'all') params.type = typeFilter;
+        const response = await api.get(url, { params });
+        setProviders(response.data.data || []);
       }
     } catch (error) {
       console.error('Erreur:', error);
@@ -96,11 +63,9 @@ export default function AdminProviders() {
 
   const toggleStatus = async (id: number) => {
     try {
-      const response = await api.post(`/debug/admin/providers/${id}/toggle-status`);
-      setProviders(prev => prev.map(p => 
-        p.id === id ? { ...p, is_active: response.data.data.is_active } : p
-      ));
-      showNotification('success', response.data.message);
+      await api.patch(`/admin/providers/${id}/toggle-status`);
+      fetchProviders();
+      showNotification('success', 'Statut modifié');
     } catch (error: any) {
       showNotification('error', error.response?.data?.message || 'Erreur lors de la modification');
     }
@@ -108,11 +73,9 @@ export default function AdminProviders() {
 
   const togglePremium = async (id: number) => {
     try {
-      const response = await api.post(`/debug/admin/providers/${id}/toggle-premium`);
-      setProviders(prev => prev.map(p => 
-        p.id === id ? { ...p, is_premium: response.data.data.is_premium } : p
-      ));
-      showNotification('success', response.data.message);
+      await api.patch(`/admin/providers/${id}/toggle-premium`);
+      fetchProviders();
+      showNotification('success', 'Type modifié');
     } catch (error) {
       showNotification('error', 'Erreur lors de la modification');
     }
@@ -125,11 +88,9 @@ export default function AdminProviders() {
 
   const hideProvider = async (id: number) => {
     try {
-      const response = await api.post(`/debug/admin/providers/${id}/hide`);
-      setProviders(prev => prev.map(p => 
-        p.id === id ? { ...p, is_hidden: response.data.data.is_hidden } : p
-      ));
-      showNotification('success', response.data.message);
+      await api.patch(`/admin/providers/${id}/hide`);
+      fetchProviders();
+      showNotification('success', 'Visibilité modifiée');
     } catch (error) {
       showNotification('error', 'Erreur lors de la modification');
     }
@@ -145,17 +106,15 @@ export default function AdminProviders() {
     
     try {
       const url = lockModal.isLocked 
-        ? `/debug/admin/providers/${lockModal.providerId}/unlock`
-        : `/debug/admin/providers/${lockModal.providerId}/lock`;
+        ? `/admin/providers/${lockModal.providerId}/unlock`
+        : `/admin/providers/${lockModal.providerId}/lock`;
         
-      const response = lockModal.isLocked 
-        ? await api.post(url)
-        : await api.post(url, lockForm);
+      lockModal.isLocked 
+        ? await api.patch(url)
+        : await api.patch(url, lockForm);
 
-      setProviders(prev => prev.map(p => 
-        p.id === lockModal.providerId ? { ...p, is_locked: response.data.data.is_locked } : p
-      ));
-      showNotification('success', response.data.message);
+      fetchProviders();
+      showNotification('success', lockModal.isLocked ? 'Prestataire déverrouillé' : 'Prestataire verrouillé');
       setLockModal({open: false, providerId: null, isLocked: false});
     } catch (error) {
       showNotification('error', 'Erreur lors de la modification');
@@ -166,9 +125,9 @@ export default function AdminProviders() {
     if (!confirm('Êtes-vous sûr de vouloir supprimer ce prestataire ?')) return;
     
     try {
-      const response = await api.delete(`/debug/admin/providers/${id}`);
+      await api.delete(`/admin/providers/${id}`);
       setProviders(prev => prev.filter(p => p.id !== id));
-      showNotification('success', response.data.message);
+      showNotification('success', 'Prestataire supprimé');
     } catch (error) {
       showNotification('error', 'Erreur lors de la suppression');
     }

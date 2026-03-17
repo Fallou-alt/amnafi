@@ -19,6 +19,8 @@ import AdminHomePage from './pages/AdminHomePage';
 import AdminProfilePage from './pages/AdminProfilePage';
 import AdminStatisticsPage from './pages/AdminStatisticsPage';
 import AdminModerationPage from './pages/AdminModerationPage';
+import AdminLoginPage from './pages/AdminLoginPage';
+import AdminGuard from './components/AdminGuard';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import JojOfficialProvidersPage from './pages/JojOfficialProvidersPage';
 import JojMissionsPage from './pages/JojMissionsPage';
@@ -61,20 +63,23 @@ function App() {
         <Route path="/payment/cancel" element={<PaymentCancelPage />} />
         <Route path="/payment/success" element={<PaymentSuccessPage />} />
         
-        {/* Admin Routes */}
-        <Route path="/admin" element={<AdminHomePage />} />
-        <Route path="/admin/dashboard" element={<AdminDashboard />} />
-        <Route path="/admin/prestataires" element={<AdminProvidersPage />} />
-        <Route path="/admin/profil" element={<AdminProfilePage />} />
-        <Route path="/admin/statistiques" element={<AdminStatisticsPage />} />
-        <Route path="/admin/moderation" element={<AdminModerationPage />} />
+        {/* Admin Login */}
+        <Route path="/admin/login" element={<AdminLoginPage />} />
+
+        {/* Admin Routes - Protégées */}
+        <Route path="/admin" element={<AdminGuard><AdminHomePage /></AdminGuard>} />
+        <Route path="/admin/dashboard" element={<AdminGuard><AdminDashboard /></AdminGuard>} />
+        <Route path="/admin/prestataires" element={<AdminGuard><AdminProvidersPage /></AdminGuard>} />
+        <Route path="/admin/profil" element={<AdminGuard><AdminProfilePage /></AdminGuard>} />
+        <Route path="/admin/statistiques" element={<AdminGuard><AdminStatisticsPage /></AdminGuard>} />
+        <Route path="/admin/moderation" element={<AdminGuard><AdminModerationPage /></AdminGuard>} />
         
         {/* JOJ Routes */}
         <Route path="/joj/official-providers" element={<JojOfficialProvidersPage />} />
         <Route path="/joj/official-providers/:id" element={<JojProviderDetailPage />} />
         <Route path="/joj/missions" element={<JojMissionsPage />} />
-        <Route path="/joj/admin/providers" element={<AdminJojProvidersPage />} />
-        <Route path="/joj/admin/missions" element={<AdminJojMissionsPage />} />
+        <Route path="/joj/admin/providers" element={<AdminGuard><AdminJojProvidersPage /></AdminGuard>} />
+        <Route path="/joj/admin/missions" element={<AdminGuard><AdminJojMissionsPage /></AdminGuard>} />
         
         {/* Official Providers Routes */}
         <Route path="/prestataires-officiels" element={<OfficialProvidersListPage />} />
