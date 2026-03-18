@@ -15,7 +15,7 @@ export default function AdminLoginPage() {
 
     try {
       const response = await api.post('/auth/login', formData);
-      const { token, user } = response.data;
+      const { token, user } = response.data.data;
 
       if (!user.is_admin) {
         setError('Accès refusé. Vous n\'êtes pas administrateur.');
@@ -24,7 +24,6 @@ export default function AdminLoginPage() {
 
       localStorage.setItem('admin_token', token);
       localStorage.setItem('admin_user', JSON.stringify(user));
-      // Utiliser le même token pour les appels API
       localStorage.setItem('token', token);
       navigate('/admin/dashboard');
     } catch (err: any) {
