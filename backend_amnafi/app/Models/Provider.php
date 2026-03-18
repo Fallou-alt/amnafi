@@ -131,7 +131,7 @@ class Provider extends Model
     public function getCoverPhotoUrlAttribute()
     {
         if ($this->cover_photo) {
-            return Storage::url($this->cover_photo);
+            return 'https://amnafi.net/backend/public/storage/' . $this->cover_photo;
         }
         return null;
     }
@@ -139,7 +139,7 @@ class Provider extends Model
     public function getProfilePhotoUrlAttribute()
     {
         if ($this->profile_photo) {
-            return Storage::url($this->profile_photo);
+            return 'https://amnafi.net/backend/public/storage/' . $this->profile_photo;
         }
         return null;
     }
