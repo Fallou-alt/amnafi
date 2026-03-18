@@ -175,7 +175,7 @@ export default function CategoryPage() {
                 <div className="relative h-40 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 overflow-hidden">
                   {provider.cover_photo ? (
                     <img
-                      src={`https://amnafi.net/storage/${provider.cover_photo}`}
+                      src={`https://amnafi.net/backend/public/storage/${provider.cover_photo}`}
                       alt="Couverture"
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
@@ -199,7 +199,7 @@ export default function CategoryPage() {
                         <div className="w-16 h-16 bg-gradient-to-br from-blue-200 to-purple-200 rounded-full overflow-hidden ring-4 ring-white shadow-lg">
                           {provider.profile_photo ? (
                             <img
-                              src={`https://amnafi.net/storage/${provider.profile_photo}`}
+                              src={`https://amnafi.net/backend/public/storage/${provider.profile_photo}`}
                               alt={provider.business_name}
                               className="w-full h-full object-cover"
                             />

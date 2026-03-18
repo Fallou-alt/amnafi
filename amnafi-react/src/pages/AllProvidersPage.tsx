@@ -194,7 +194,7 @@ export default function AllProviders() {
                 <div className="relative h-48 bg-gradient-to-r from-orange-400 via-red-400 to-orange-400 overflow-hidden">
                   {provider.cover_photo ? (
                     <img
-                      src={`https://amnafi.net/storage/${provider.cover_photo}`}
+                      src={`https://amnafi.net/backend/public/storage/${provider.cover_photo}`}
                       alt="Couverture"
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                     />
@@ -216,11 +216,12 @@ export default function AllProviders() {
                     <div className="flex items-center space-x-3">
                       <div className="relative">
                         <div className="w-20 h-20 bg-gradient-to-br from-orange-200 to-red-200 rounded-2xl overflow-hidden ring-4 ring-white shadow-xl transform group-hover:rotate-6 transition-transform duration-500">
-                          {provider.profile_photo ? (
+                          {provider.profile_photo_url || provider.profile_photo ? (
                             <img
-                              src={`https://amnafi.net/storage/${provider.profile_photo}`}
+                              src={provider.profile_photo_url || `https://amnafi.net/backend/public/storage/${provider.profile_photo}`}
                               alt={provider.business_name}
                               className="w-full h-full object-cover"
+                              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                             />
                           ) : (
                             <div className="w-full h-full bg-gradient-to-br from-orange-400 to-red-400 flex items-center justify-center">

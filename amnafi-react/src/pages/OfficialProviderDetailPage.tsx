@@ -79,7 +79,7 @@ export default function OfficialProviderDetailPage() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-orange-50">
       <div className="relative h-64 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500">
         {provider.cover_photo && (
-          <img src={`https://amnafi.net/storage/${provider.cover_photo}`} alt="Cover" className="w-full h-full object-cover" />
+          <img src={`https://amnafi.net/backend/public/storage/${provider.cover_photo}`} alt="Cover" className="w-full h-full object-cover" />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
         
@@ -99,7 +99,7 @@ export default function OfficialProviderDetailPage() {
                 <div className="relative mb-4">
                   <div className="w-32 h-32 bg-gradient-to-br from-blue-200 to-purple-200 rounded-full overflow-hidden ring-4 ring-white shadow-xl">
                     {provider.profile_photo ? (
-                      <img src={`https://amnafi.net/storage/${provider.profile_photo}`} alt={provider.business_name} className="w-full h-full object-cover" />
+                      <img src={`https://amnafi.net/backend/public/storage/${provider.profile_photo}`} alt={provider.business_name} className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full bg-gradient-to-br from-blue-400 to-purple-400 flex items-center justify-center">
                         <span className="text-white font-bold text-4xl">{provider.business_name.charAt(0)}</span>
