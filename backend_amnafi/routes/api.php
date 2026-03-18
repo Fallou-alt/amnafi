@@ -84,6 +84,8 @@ Route::prefix('provider')->group(function () {
         Route::post('/upgrade-premium', [App\Http\Controllers\Api\ProviderRegistrationController::class, 'upgradeToPremiun']);
         Route::post('/update-photo', [App\Http\Controllers\Api\ProviderRegistrationController::class, 'updateProfilePhoto']);
         Route::get('/profile', [App\Http\Controllers\Api\ProviderRegistrationController::class, 'getProfile']);
+        Route::put('/profile', [App\Http\Controllers\Api\ProviderRegistrationController::class, 'updateProfile']);
+        Route::post('/upload-photo', [App\Http\Controllers\Api\ProviderRegistrationController::class, 'updateProfilePhoto']);
     });
 });
 

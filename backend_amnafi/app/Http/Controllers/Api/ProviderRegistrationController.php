@@ -179,6 +179,29 @@ class ProviderRegistrationController extends Controller
         }
     }
 
+    public function updateProfile(Request $request)
+    {
+        $provider = auth()->user()->provider ?? Provider::where('user_id', auth()->id())->first();
+
+        if (!$provider) {
+            return response()->json(['success' => false, 'message' => 'Profil prestataire non trouvé'], 404);
+        }
+
+        $request->validate([
+            'business_name' => 'nullable|string|max:255',
+            'description' => 'nullable|string|max:1000',
+            'phone' => 'nullable|string|max:20',
+            'city' => 'nullable|string|max:100',
+            'address' => 'nullable|string|max:255',
+        ]);
+
+        $provider->update($request->only(['business_name', 'description', 'phone', 'city', 'address']));
+
+        $provider->profile_photo_url = $provider->profile_photo ? 'https://amnafi.net/backend/public/storage/' . $provider->profile_photo : null;
+
+        return response()->json(['success' => true, 'message' => 'Profil mis à jour', 'data' => $provider]);
+    }
+
     public function updateProfilePhoto(Request $request)
     {
         $request->validate([
