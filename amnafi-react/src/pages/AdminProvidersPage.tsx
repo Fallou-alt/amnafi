@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../lib/api';
 
 interface Provider {
@@ -23,6 +24,7 @@ interface Provider {
 }
 
 export default function AdminProviders() {
+  const navigate = useNavigate();
   const [providers, setProviders] = useState<Provider[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -235,12 +237,21 @@ export default function AdminProviders() {
               {providers.map((provider) => (
                 <tr key={provider.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div>
-                      <div className="text-sm font-medium text-gray-900">
-                        {provider.business_name}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        {provider.category.name}
+                    <div className="flex items-center space-x-3">
+                      {provider.profile_photo ? (
+                        <img
+                          src={`https://amnafi.net/backend/public/storage/${provider.profile_photo}`}
+                          className="w-9 h-9 rounded-full object-cover"
+                          onError={(e) => { (e.target as HTMLImageElement).style.display='none'; }}
+                        />
+                      ) : (
+                        <div className="w-9 h-9 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold text-sm">
+                          {provider.business_name.charAt(0)}
+                        </div>
+                      )}
+                      <div>
+                        <div className="text-sm font-medium text-gray-900">{provider.business_name}</div>
+                        <div className="text-xs text-gray-500">{provider.category?.name}</div>
                       </div>
                     </div>
                   </td>
@@ -322,17 +333,21 @@ export default function AdminProviders() {
                       </button>
                       
                       <button
+                        onClick={() => navigate(`/admin/prestataires/${provider.id}`)}
+                        className="text-blue-600 hover:text-blue-900 px-2 py-1 rounded text-xs"
+                        title="Voir détails"
+                      >
+                        👁️
+                      </button>
+                      
+                      <button
+                      <button
                         onClick={() => deleteProvider(provider.id)}
                         className="text-red-600 hover:text-red-900 px-2 py-1 rounded text-xs"
                         title="Supprimer"
                       >
                         🗑️
                       </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
           </table>
         </div>
       </div>

@@ -31,44 +31,14 @@ export default function AdminModerationPage() {
 
   const fetchProviders = async () => {
     try {
-      let url = '/debug/providers';
-      
-      if (searchPhone.trim()) {
-        url = `/debug/admin/providers/search?q=${encodeURIComponent(searchPhone.trim())}`;
-      }
-      
-      const response = await api.get(url);
-      let filteredProviders = searchPhone.trim() ? response.data.data : response.data.data.providers;
-      
-      if (searchPhone.trim() && filteredProviders.length === 0) {
-        showNotification('error', `Aucun prestataire trouvé avec le téléphone ${searchPhone}`);
-        setProviders([]);
-        return;
-      }
+      const params: any = {};
+      if (searchPhone.trim()) params.search = searchPhone.trim();
+      if (filter === 'hidden') params.moderation = 'hidden';
+      else if (filter === 'locked') params.moderation = 'locked';
+      else if (filter === 'issues') params.moderation = 'issues';
 
-      if (filter === 'hidden') {
-        filteredProviders = filteredProviders.filter((p: any) => p.is_hidden);
-      } else if (filter === 'locked') {
-        filteredProviders = filteredProviders.filter((p: any) => p.is_locked);
-      } else if (filter === 'issues') {
-        filteredProviders = filteredProviders.filter((p: any) => p.is_hidden || p.is_locked || !p.is_active);
-      }
-
-      setProviders(filteredProviders.map((p: any) => ({
-        id: p.id,
-        business_name: p.business_name,
-        is_active: p.is_active,
-        is_hidden: p.is_hidden || false,
-        is_locked: p.is_locked || false,
-        locked_until: p.locked_until,
-        status_reason: p.status_reason,
-        admin_notes: p.admin_notes,
-        user: {
-          name: p.user_name || 'Inconnu',
-          email: p.user?.email || '',
-          phone: p.phone || p.user_phone || ''
-        }
-      })));
+      const response = await api.get('/admin/providers', { params });
+      setProviders(response.data.data || []);
     } catch (error) {
       console.error('Erreur:', error);
       showNotification('error', 'Erreur lors du chargement');
@@ -84,30 +54,15 @@ export default function AdminModerationPage() {
 
   const quickAction = async (id: number, action: string) => {
     try {
-      let url = '';
-      let body = null;
-
-      switch (action) {
-        case 'unhide':
-        case 'hide':
-          url = `/debug/admin/providers/${id}/hide`;
-          break;
-        case 'unlock':
-          url = `/debug/admin/providers/${id}/unlock`;
-          break;
-        case 'activate':
-          url = `/debug/admin/providers/${id}/toggle-status`;
-          break;
-        case 'lock':
-          url = `/debug/admin/providers/${id}/lock`;
-          body = { duration: 7, reason: 'Verrouillage rapide depuis modération' };
-          break;
-      }
-
-      const response = body ? await api.post(url, body) : await api.post(url);
-      showNotification('success', response.data.message);
+      const actionMap: Record<string, string> = {
+        hide: 'hide', unhide: 'hide', unlock: 'unlock', activate: 'toggle-status',
+        lock: 'lock'
+      };
+      const body = action === 'lock' ? { duration: 7, reason: 'Verrouillage rapide depuis modération' } : undefined;
+      await api.patch(`/admin/providers/${id}/${actionMap[action]}`, body);
+      showNotification('success', 'Action effectuée');
       fetchProviders();
-    } catch (error) {
+    } catch {
       showNotification('error', 'Erreur lors de l\'action');
     }
   };

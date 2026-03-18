@@ -20,7 +20,9 @@ import AdminProfilePage from './pages/AdminProfilePage';
 import AdminStatisticsPage from './pages/AdminStatisticsPage';
 import AdminModerationPage from './pages/AdminModerationPage';
 import AdminLoginPage from './pages/AdminLoginPage';
+import AdminProviderDetailPage from './pages/AdminProviderDetailPage';
 import AdminGuard from './components/AdminGuard';
+import AdminLayout from './components/AdminLayout';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import JojOfficialProvidersPage from './pages/JojOfficialProvidersPage';
 import JojMissionsPage from './pages/JojMissionsPage';
@@ -66,20 +68,21 @@ function App() {
         {/* Admin Login */}
         <Route path="/admin/login" element={<AdminLoginPage />} />
 
-        {/* Admin Routes - Protégées */}
-        <Route path="/admin" element={<AdminGuard><AdminHomePage /></AdminGuard>} />
-        <Route path="/admin/dashboard" element={<AdminGuard><AdminDashboard /></AdminGuard>} />
-        <Route path="/admin/prestataires" element={<AdminGuard><AdminProvidersPage /></AdminGuard>} />
-        <Route path="/admin/profil" element={<AdminGuard><AdminProfilePage /></AdminGuard>} />
-        <Route path="/admin/statistiques" element={<AdminGuard><AdminStatisticsPage /></AdminGuard>} />
-        <Route path="/admin/moderation" element={<AdminGuard><AdminModerationPage /></AdminGuard>} />
+        {/* Admin Routes - Protégées avec Layout */}
+        <Route path="/admin" element={<AdminGuard><AdminLayout><AdminHomePage /></AdminLayout></AdminGuard>} />
+        <Route path="/admin/dashboard" element={<AdminGuard><AdminLayout><AdminDashboard /></AdminLayout></AdminGuard>} />
+        <Route path="/admin/prestataires" element={<AdminGuard><AdminLayout><AdminProvidersPage /></AdminLayout></AdminGuard>} />
+        <Route path="/admin/prestataires/:id" element={<AdminGuard><AdminLayout><AdminProviderDetailPage /></AdminLayout></AdminGuard>} />
+        <Route path="/admin/profil" element={<AdminGuard><AdminLayout><AdminProfilePage /></AdminLayout></AdminGuard>} />
+        <Route path="/admin/statistiques" element={<AdminGuard><AdminLayout><AdminStatisticsPage /></AdminLayout></AdminGuard>} />
+        <Route path="/admin/moderation" element={<AdminGuard><AdminLayout><AdminModerationPage /></AdminLayout></AdminGuard>} />
         
         {/* JOJ Routes */}
         <Route path="/joj/official-providers" element={<JojOfficialProvidersPage />} />
         <Route path="/joj/official-providers/:id" element={<JojProviderDetailPage />} />
         <Route path="/joj/missions" element={<JojMissionsPage />} />
-        <Route path="/joj/admin/providers" element={<AdminGuard><AdminJojProvidersPage /></AdminGuard>} />
-        <Route path="/joj/admin/missions" element={<AdminGuard><AdminJojMissionsPage /></AdminGuard>} />
+        <Route path="/joj/admin/providers" element={<AdminGuard><AdminLayout><AdminJojProvidersPage /></AdminLayout></AdminGuard>} />
+        <Route path="/joj/admin/missions" element={<AdminGuard><AdminLayout><AdminJojMissionsPage /></AdminLayout></AdminGuard>} />
         
         {/* Official Providers Routes */}
         <Route path="/prestataires-officiels" element={<OfficialProvidersListPage />} />
