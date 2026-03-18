@@ -61,9 +61,9 @@ class ProviderController extends Controller
                 'badge_visible' => $provider->isPremium()
             ];
             $provider->profile_photo_url = $provider->profile_photo ? 
-                url('storage/' . $provider->profile_photo) : null;
+                url('backend/public/storage/' . $provider->profile_photo) : null;
             $provider->cover_photo_url = $provider->cover_photo ? 
-                url('storage/' . $provider->cover_photo) : null;
+                url('backend/public/storage/' . $provider->cover_photo) : null;
             $provider->whatsapp_url = 'https://wa.me/' . preg_replace('/[^0-9]/', '', $provider->phone);
             return $provider;
         });
@@ -116,9 +116,9 @@ class ProviderController extends Controller
 
         $providers->transform(function ($provider) {
             $provider->profile_photo_url = $provider->profile_photo ? 
-                url('storage/' . $provider->profile_photo) : null;
+                url('backend/public/storage/' . $provider->profile_photo) : null;
             $provider->cover_photo_url = $provider->cover_photo ? 
-                url('storage/' . $provider->cover_photo) : null;
+                url('backend/public/storage/' . $provider->cover_photo) : null;
             $provider->whatsapp_url = 'https://wa.me/' . preg_replace('/[^0-9]/', '', $provider->phone);
             return $provider;
         });
@@ -142,9 +142,9 @@ class ProviderController extends Controller
 
         $providers->transform(function ($provider) {
             $provider->profile_photo_url = $provider->profile_photo ? 
-                url('storage/' . $provider->profile_photo) : null;
+                url('backend/public/storage/' . $provider->profile_photo) : null;
             $provider->cover_photo_url = $provider->cover_photo ? 
-                url('storage/' . $provider->cover_photo) : null;
+                url('backend/public/storage/' . $provider->cover_photo) : null;
             $provider->whatsapp_url = 'https://wa.me/' . preg_replace('/[^0-9]/', '', $provider->phone);
             return $provider;
         });
@@ -168,9 +168,9 @@ class ProviderController extends Controller
 
         $providers->transform(function ($provider) {
             $provider->profile_photo_url = $provider->profile_photo ? 
-                url('storage/' . $provider->profile_photo) : null;
+                url('backend/public/storage/' . $provider->profile_photo) : null;
             $provider->cover_photo_url = $provider->cover_photo ? 
-                url('storage/' . $provider->cover_photo) : null;
+                url('backend/public/storage/' . $provider->cover_photo) : null;
             $provider->whatsapp_url = 'https://wa.me/' . preg_replace('/[^0-9]/', '', $provider->phone);
             return $provider;
         });
@@ -332,9 +332,9 @@ class ProviderController extends Controller
         
         $providers->transform(function ($provider) {
             $provider->profile_photo_url = $provider->profile_photo ? 
-                url('storage/' . $provider->profile_photo) : null;
+                url('backend/public/storage/' . $provider->profile_photo) : null;
             $provider->cover_photo_url = $provider->cover_photo ? 
-                url('storage/' . $provider->cover_photo) : null;
+                url('backend/public/storage/' . $provider->cover_photo) : null;
             $provider->whatsapp_url = 'https://wa.me/' . preg_replace('/[^0-9]/', '', $provider->phone);
             return $provider;
         });
@@ -342,7 +342,7 @@ class ProviderController extends Controller
         $services->transform(function ($service) {
             if ($service->provider) {
                 $service->provider->profile_photo_url = $service->provider->profile_photo ? 
-                    url('storage/' . $service->provider->profile_photo) : null;
+                    url('backend/public/storage/' . $service->provider->profile_photo) : null;
                 $service->provider->whatsapp_url = 'https://wa.me/' . preg_replace('/[^0-9]/', '', $service->provider->phone);
             }
             return $service;

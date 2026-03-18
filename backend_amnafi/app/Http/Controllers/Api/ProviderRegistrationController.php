@@ -49,7 +49,8 @@ class ProviderRegistrationController extends Controller
         $profilePhotoPath = $this->handleProfilePhotoUpload($request->file('profile_photo'));
 
         $phone = preg_replace('/[^0-9]/', '', $request->phone);
-        $email = $request->email ?? ($phone . '@amnafi.local');
+        $baseEmail = $phone . '@amnafi.local';
+        $email = $request->email ?? (Provider::where('email', $baseEmail)->exists() ? $phone . '_2@amnafi.local' : $baseEmail);
         $fullName = $request->first_name . ' ' . $request->last_name;
         
         // Vérifier si le numéro a déjà 2 profils
