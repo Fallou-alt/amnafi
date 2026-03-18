@@ -341,8 +341,8 @@ class ProviderRegistrationController extends Controller
         }
         
         $provider->load('category');
-        $provider->profile_photo_url = $provider->profile_photo ? url('storage/' . $provider->profile_photo) : null;
-        $provider->cover_photo_url = $provider->cover_photo ? url('storage/' . $provider->cover_photo) : null;
+        $provider->profile_photo_url = $provider->profile_photo ? url('backend/public/storage/' . $provider->profile_photo) : null;
+        $provider->cover_photo_url = $provider->cover_photo ? url('backend/public/storage/' . $provider->cover_photo) : null;
 
         return response()->json([
             'success' => true,

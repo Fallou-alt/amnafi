@@ -41,7 +41,8 @@ export default function AdminProviders() {
       if (statusFilter !== 'all') params.status = statusFilter;
       if (typeFilter !== 'all') params.type = typeFilter;
       const response = await api.get('/admin/providers', { params });
-      setProviders(response.data.data || []);
+      const raw = response.data.data;
+      setProviders(Array.isArray(raw) ? raw : (raw?.data || []));
     } catch (error) {
       console.error('Erreur:', error);
     } finally {

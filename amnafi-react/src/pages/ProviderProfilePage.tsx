@@ -346,7 +346,10 @@ export default function ProviderProfilePage() {
                 
                 {provider?.[field as keyof Provider] && (
                   <img
-                    src={`https://amnafi.net/backend/public/storage/${provider[field as keyof Provider]}`}
+                    src={field === 'photo_profil' 
+                      ? (provider.profile_photo_url || `https://amnafi.net/backend/public/storage/${provider[field as keyof Provider]}`)
+                      : `https://amnafi.net/backend/public/storage/${provider[field as keyof Provider]}`
+                    }
                     alt={field}
                     className="w-full h-32 object-cover rounded mb-2"
                     onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}

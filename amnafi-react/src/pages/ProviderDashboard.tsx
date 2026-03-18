@@ -5,6 +5,8 @@ import api from '../lib/api';
 
 type Provider = {
   profile_photo?: string;
+  profile_photo_url?: string;
+  cover_photo_url?: string;
   business_name?: string;
   is_verified?: boolean;
   subscription_type?: string;
@@ -93,9 +95,9 @@ export default function ProviderDashboard() {
         {/* Welcome Section */}
         <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg shadow-lg p-8 text-white mb-8">
           <div className="flex items-center gap-4">
-            {profile?.provider?.profile_photo ? (
+            {profile?.provider?.profile_photo_url ? (
               <img 
-                src={profile.provider.profile_photo} 
+                src={profile.provider.profile_photo_url} 
                 alt="Profil" 
                 className="w-20 h-20 rounded-full border-4 border-white object-cover"
               />

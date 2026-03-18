@@ -38,7 +38,10 @@ export default function AdminModerationPage() {
       else if (filter === 'issues') params.moderation = 'issues';
 
       const response = await api.get('/admin/providers', { params });
-      setProviders(response.data.data || []);
+      // Laravel paginate retourne data.data.data (paginator)
+      const raw = response.data.data;
+      const list = Array.isArray(raw) ? raw : (raw?.data || []);
+      setProviders(list);
     } catch (error) {
       console.error('Erreur:', error);
       showNotification('error', 'Erreur lors du chargement');
