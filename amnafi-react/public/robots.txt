@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+
+Disallow: /admin/
+Disallow: /provider/dashboard
+Disallow: /provider/profile
+Disallow: /payment/
+
+Sitemap: https://amnafi.net/sitemap.xml

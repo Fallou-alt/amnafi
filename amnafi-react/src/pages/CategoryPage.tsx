@@ -3,6 +3,7 @@ import { useSearchParams, Link } from 'react-router-dom';
 import { ArrowLeft, Star, MapPin, Phone, MessageCircle, Crown, CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import api from '../lib/api';
+import SEO from '../components/SEO';
 
 interface Category {
   id: number;
@@ -95,6 +96,11 @@ export default function CategoryPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      <SEO
+        title={selectedCat ? `Prestataires - ${selectedCat.name}` : 'Catégories de services'}
+        description={selectedCat ? `Trouvez les meilleurs prestataires en ${selectedCat.name} près de chez vous au Sénégal.` : 'Parcourez toutes les catégories de services disponibles sur AMNAFI.'}
+        url={`/categories${selectedCategory ? `?category=${selectedCategory}` : ''}`}
+      />
       <div className="bg-white/80 backdrop-blur-sm shadow-lg border-b border-blue-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center space-x-4 mb-6">

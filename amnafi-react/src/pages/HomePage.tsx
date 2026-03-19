@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Search, Menu, Phone, MessageCircle, Star, Shield } from 'lucide-react';
 import api from '../lib/api';
+import SEO from '../components/SEO';
 
 export default function HomePage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -37,6 +38,7 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-orange-50">
+      <SEO url="/" />
       {/* Navigation */}
       <nav className="bg-white shadow-lg sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

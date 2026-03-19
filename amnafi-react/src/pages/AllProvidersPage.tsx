@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { Star, MapPin, Phone, Crown, ArrowLeft, Search, MessageCircle, CheckCircle } from 'lucide-react';
 import api from '../lib/api';
+import SEO from '../components/SEO';
 
 interface Provider {
   id: number;
@@ -103,6 +104,7 @@ export default function AllProviders() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-red-50">
+      <SEO title="Tous les prestataires" description="Trouvez parmi tous nos prestataires de services au Sénégal : coiffure, informatique, plomberie, électricité et plus encore." url="/prestataires" />
       <div className="bg-white/90 backdrop-blur-md shadow-xl border-b border-orange-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between mb-4">
