@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import KoriteBanner from './components/KoriteBanner';
 import HomePage from './pages/HomePage';
 import ProviderLoginPage from './pages/ProviderLoginPage';
 import ProviderRegisterPage from './pages/ProviderRegisterPage';
@@ -38,6 +39,7 @@ import './index.css';
 function App() {
   return (
     <Router>
+      <KoriteBanner />
       <Routes>
         <Route path="/" element={<HomePage />} />
         
