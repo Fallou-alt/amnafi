@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Camera, Save, ArrowLeft, User, Building, Image } from 'lucide-react';
+import { Camera, Save, ArrowLeft, User, Building, Image, Lock, MapPin } from 'lucide-react';
 import api from '../lib/api';
 
 interface Provider {
@@ -14,6 +14,9 @@ interface Provider {
   profile_photo_url: string;
   cover_photo: string;
   cover_photo_url: string;
+  geolocalisation_active?: boolean;
+  latitude?: number;
+  longitude?: number;
   category: {
     id: number;
     name: string;
@@ -40,6 +43,12 @@ export default function ProviderProfilePage() {
   const [coverPhoto, setCoverPhoto] = useState<File | null>(null);
   const [profilePreview, setProfilePreview] = useState<string>('');
   const [coverPreview, setCoverPreview] = useState<string>('');
+
+  const [passwordData, setPasswordData] = useState({
+    current_password: '',
+    new_password: '',
+    new_password_confirmation: ''
+  });
 
   useEffect(() => {
     fetchProfile();
@@ -87,6 +96,10 @@ export default function ProviderProfilePage() {
     }
   };
 
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPasswordData({ ...passwordData, [e.target.name]: e.target.value });
+  };
+
   const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
@@ -129,6 +142,74 @@ export default function ProviderProfilePage() {
       setError(err.response?.data?.message || 'Erreur d\'upload');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handlePasswordUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (passwordData.new_password !== passwordData.new_password_confirmation) {
+      setError('Les mots de passe ne correspondent pas');
+      return;
+    }
+
+    setSaving(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      await api.put('/provider/password', passwordData);
+      setSuccess('Mot de passe modifié avec succès');
+      setPasswordData({
+        current_password: '',
+        new_password: '',
+        new_password_confirmation: ''
+      });
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Erreur de modification du mot de passe');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const toggleGeolocation = async () => {
+    if (!provider) return;
+
+    if (!provider.geolocalisation_active) {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          async (position) => {
+            try {
+              await api.put('/provider/geolocation', {
+                geolocalisation_active: true,
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude
+              });
+              setSuccess('Géolocalisation activée avec succès');
+              fetchProfile();
+            } catch (err: any) {
+              setError(err.response?.data?.message || 'Erreur d\'activation de la géolocalisation');
+            }
+          },
+          () => {
+            setError('Impossible d\'obtenir votre position. Vérifiez les autorisations de géolocalisation.');
+          }
+        );
+      } else {
+        setError('La géolocalisation n\'est pas supportée par votre navigateur');
+      }
+    } else {
+      try {
+        await api.put('/provider/geolocation', {
+          geolocalisation_active: false,
+          latitude: null,
+          longitude: null
+        });
+        setSuccess('Géolocalisation désactivée');
+        fetchProfile();
+      } catch (err: any) {
+        setError(err.response?.data?.message || 'Erreur de désactivation de la géolocalisation');
+      }
     }
   };
 
@@ -311,6 +392,99 @@ export default function ProviderProfilePage() {
               {saving ? 'Enregistrement...' : 'Enregistrer les modifications'}
             </button>
           </form>
+        </div>
+
+        {/* Section Mot de passe */}
+        <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
+          <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
+            <Lock className="w-5 h-5 text-orange-600" />
+            Changer le mot de passe
+          </h2>
+          
+          <form onSubmit={handlePasswordUpdate} className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Mot de passe actuel</label>
+                <input
+                  type="password"
+                  name="current_password"
+                  value={passwordData.current_password}
+                  onChange={handlePasswordChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  placeholder="Votre mot de passe actuel"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Nouveau mot de passe</label>
+                <input
+                  type="password"
+                  name="new_password"
+                  value={passwordData.new_password}
+                  onChange={handlePasswordChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  placeholder="Nouveau mot de passe"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Confirmer le mot de passe</label>
+                <input
+                  type="password"
+                  name="new_password_confirmation"
+                  value={passwordData.new_password_confirmation}
+                  onChange={handlePasswordChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  placeholder="Confirmer le mot de passe"
+                  required
+                />
+              </div>
+            </div>
+            
+            <button
+              type="submit"
+              disabled={saving}
+              className="px-8 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2 font-medium"
+            >
+              <Lock className="w-4 h-4" />
+              {saving ? 'Modification...' : 'Modifier le mot de passe'}
+            </button>
+          </form>
+        </div>
+
+        {/* Section Géolocalisation */}
+        <div className="bg-white rounded-2xl shadow-lg p-6">
+          <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
+            <MapPin className="w-5 h-5 text-orange-600" />
+            Géolocalisation
+          </h2>
+          
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+            <div className="flex-1">
+              <p className="text-gray-600 mb-2">
+                Activez la géolocalisation pour apparaître dans les recherches à proximité des clients.
+              </p>
+              {provider?.geolocalisation_active && provider.latitude && provider.longitude && (
+                <p className="text-sm text-gray-500">
+                  Position actuelle : {provider.latitude.toFixed(6)}, {provider.longitude.toFixed(6)}
+                </p>
+              )}
+            </div>
+            
+            <button
+              onClick={toggleGeolocation}
+              className={`px-6 py-3 rounded-xl font-medium flex items-center gap-2 ${
+                provider?.geolocalisation_active
+                  ? 'bg-red-600 hover:bg-red-700 text-white'
+                  : 'bg-green-600 hover:bg-green-700 text-white'
+              }`}
+            >
+              <MapPin className="w-4 h-4" />
+              {provider?.geolocalisation_active ? 'Désactiver' : 'Activer'} la géolocalisation
+            </button>
+          </div>
         </div>
       </div>
     </div>

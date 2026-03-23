@@ -202,6 +202,48 @@ class ProviderRegistrationController extends Controller
         return response()->json(['success' => true, 'message' => 'Profil mis à jour', 'data' => $provider]);
     }
 
+    public function updatePassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => 'required',
+            'new_password' => 'required|min:6',
+            'new_password_confirmation' => 'required|same:new_password'
+        ]);
+
+        $user = auth()->user();
+        
+        if (!Hash::check($request->current_password, $user->password)) {
+            return response()->json(['success' => false, 'message' => 'Mot de passe actuel incorrect'], 400);
+        }
+
+        $user->update(['password' => Hash::make($request->new_password)]);
+
+        return response()->json(['success' => true, 'message' => 'Mot de passe modifié avec succès']);
+    }
+
+    public function updateGeolocation(Request $request)
+    {
+        $provider = auth()->user()->provider ?? Provider::where('user_id', auth()->id())->first();
+
+        if (!$provider) {
+            return response()->json(['success' => false, 'message' => 'Profil prestataire non trouvé'], 404);
+        }
+
+        $request->validate([
+            'geolocalisation_active' => 'required|boolean',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180'
+        ]);
+
+        $provider->update([
+            'geolocalisation_active' => $request->geolocalisation_active,
+            'latitude' => $request->latitude,
+            'longitude' => $request->longitude
+        ]);
+
+        return response()->json(['success' => true, 'message' => 'Géolocalisation mise à jour', 'data' => $provider]);
+    }
+
     public function updateProfilePhoto(Request $request)
     {
         $request->validate([

@@ -86,6 +86,8 @@ Route::prefix('provider')->group(function () {
         Route::get('/profile', [App\Http\Controllers\Api\ProviderRegistrationController::class, 'getProfile']);
         Route::put('/profile', [App\Http\Controllers\Api\ProviderRegistrationController::class, 'updateProfile']);
         Route::post('/upload-photo', [App\Http\Controllers\Api\ProviderRegistrationController::class, 'updateProfilePhoto']);
+        Route::put('/password', [App\Http\Controllers\Api\ProviderRegistrationController::class, 'updatePassword']);
+        Route::put('/geolocation', [App\Http\Controllers\Api\ProviderRegistrationController::class, 'updateGeolocation']);
     });
 });
 
