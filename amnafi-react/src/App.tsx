@@ -34,12 +34,14 @@ import OfficialProvidersListPage from './pages/OfficialProvidersListPage';
 import OfficialProviderDetailPage from './pages/OfficialProviderDetailPage';
 import ServiceSubcategoryPage from './pages/ServiceSubcategoryPage';
 import CategoryDetailPage from './pages/CategoryDetailPage';
+import ChatBot from './components/ChatBot';
 import './index.css';
 
 function App() {
   return (
     <Router>
       <KoriteBanner />
+      <ChatBot />
       <Routes>
         <Route path="/" element={<HomePage />} />
         
