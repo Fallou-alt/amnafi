@@ -247,9 +247,13 @@ class ProviderRegistrationController extends Controller
     public function updateProfilePhoto(Request $request)
     {
         $request->validate([
-            'profile_photo' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:10240',
+            'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:10240',
             'cover_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:10240'
         ]);
+
+        if (!$request->hasFile('profile_photo') && !$request->hasFile('cover_photo')) {
+            return response()->json(['success' => false, 'message' => 'Aucune photo fournie'], 422);
+        }
 
         $provider = auth()->user()->provider ?? Provider::where('user_id', auth()->id())->first();
         
