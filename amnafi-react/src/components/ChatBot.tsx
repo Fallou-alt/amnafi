@@ -101,40 +101,40 @@ export default function ChatBot() {
       {/* Bouton flottant */}
       <button
         onClick={() => setIsOpen(true)}
-        className={`fixed bottom-6 right-6 z-50 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white p-5 rounded-full shadow-2xl transition-all duration-300 transform hover:scale-110 ${
+        className={`fixed bottom-4 right-4 z-50 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white p-3 rounded-full shadow-2xl transition-all duration-300 transform hover:scale-110 ${
           isOpen ? 'scale-0' : 'scale-100'
         }`}
       >
-        <MessageCircle className="w-7 h-7" />
+        <MessageCircle className="w-5 h-5" />
       </button>
 
       {/* Fenêtre de chat */}
       <div
-        className={`fixed bottom-6 right-6 z-50 w-[420px] h-[600px] bg-white rounded-2xl shadow-2xl border-2 border-orange-200 transition-all duration-300 flex flex-col ${
+        className={`fixed bottom-4 right-4 z-50 w-[300px] h-[420px] bg-white rounded-2xl shadow-2xl border-2 border-orange-200 transition-all duration-300 flex flex-col ${
           isOpen ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
         }`}
       >
         {/* Header */}
-        <div className="bg-gradient-to-r from-orange-600 via-red-500 to-orange-600 text-white p-5 rounded-t-2xl flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
-              <Bot className="w-6 h-6" />
+        <div className="bg-gradient-to-r from-orange-600 via-red-500 to-orange-600 text-white p-3 rounded-t-2xl flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <div className="w-7 h-7 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+              <Bot className="w-4 h-4" />
             </div>
             <div>
-              <span className="font-bold text-lg block">Jamila</span>
+              <span className="font-bold text-sm block">Jamila</span>
               <span className="text-xs text-orange-100">Assistant AMNAFI</span>
             </div>
           </div>
           <button
             onClick={() => setIsOpen(false)}
-            className="hover:bg-white/20 p-2 rounded-full transition-colors"
+            className="hover:bg-white/20 p-1 rounded-full transition-colors"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Messages */}
-        <div className="flex-1 p-5 overflow-y-auto space-y-4 bg-gradient-to-br from-orange-50/30 to-red-50/30">
+        <div className="flex-1 p-3 overflow-y-auto space-y-3 bg-gradient-to-br from-orange-50/30 to-red-50/30">
           {messages.map((message) => (
             <div
               key={message.id}
@@ -143,8 +143,8 @@ export default function ChatBot() {
               }`}
             >
               {message.role === 'assistant' && (
-                <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg">
-                  <Bot className="w-5 h-5 text-white" />
+                <div className="w-7 h-7 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg">
+                  <Bot className="w-4 h-4 text-white" />
                 </div>
               )}
               
@@ -169,8 +169,8 @@ export default function ChatBot() {
               </div>
               
               {message.role === 'user' && (
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg">
-                  <User className="w-5 h-5 text-white" />
+                <div className="w-7 h-7 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg">
+                  <User className="w-4 h-4 text-white" />
                 </div>
               )}
             </div>
@@ -178,8 +178,8 @@ export default function ChatBot() {
           
           {isTyping && (
             <div className="flex items-start space-x-2">
-              <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex items-center justify-center shadow-lg">
-                <Bot className="w-5 h-5 text-white" />
+              <div className="w-7 h-7 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex items-center justify-center shadow-lg">
+                <Bot className="w-4 h-4 text-white" />
               </div>
               <div className="bg-white border border-gray-200 px-4 py-3 rounded-2xl shadow-md">
                 <div className="flex space-x-1">
@@ -195,23 +195,23 @@ export default function ChatBot() {
         </div>
 
         {/* Input */}
-        <div className="p-5 border-t-2 border-orange-100 bg-white rounded-b-2xl">
-          <div className="flex space-x-3">
+        <div className="p-3 border-t-2 border-orange-100 bg-white rounded-b-2xl">
+          <div className="flex space-x-2">
             <input
               type="text"
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Tapez votre message..."
-              className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-400 text-sm transition-all"
+              className="flex-1 px-3 py-2 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-400 text-sm transition-all"
               disabled={isTyping}
             />
             <button
               onClick={sendMessage}
               disabled={isTyping || !inputMessage.trim()}
-              className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 disabled:from-gray-400 disabled:to-gray-400 text-white p-3 rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
+              className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 disabled:from-gray-400 disabled:to-gray-400 text-white p-2 rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
             >
-              <Send className="w-5 h-5" />
+              <Send className="w-4 h-4" />
             </button>
           </div>
         </div>
