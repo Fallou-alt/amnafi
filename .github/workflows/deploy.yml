@@ -17,34 +17,21 @@ jobs:
           node-version: 18
 
       - name: Install & Build
-        working-directory: front_amnafi
+        working-directory: amnafi-react
         run: |
           npm install
-          NEXT_PUBLIC_API_URL=https://amnafi.net/api npm run build
-          cp -r .next/static .next/standalone/.next/static
-          cp -r public .next/standalone/public
+          VITE_API_URL=https://amnafi.net/api npm run build
 
-      - name: Deploy to Hostinger
+      - name: Deploy dist/ to Hostinger
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
-          source: "front_amnafi/.next/standalone/*"
+          source: "amnafi-react/dist/*"
           target: "/home/u928118347/domains/amnafi.net/public_html/"
           strip_components: 2
-
-      - name: Restart Next.js
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT }}
-          script: |
-            cd /home/u928118347/domains/amnafi.net/public_html
-            pm2 restart front_amnafi || pm2 start server.js --name front_amnafi
 
   deploy-backend:
     name: Deploy Backend Laravel
