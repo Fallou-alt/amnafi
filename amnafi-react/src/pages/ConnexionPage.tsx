@@ -37,6 +37,8 @@ export default function ConnexionPage() {
         } else if (response.data.data.user_type === 'provider') {
           localStorage.setItem('provider_data', JSON.stringify(response.data.data.provider));
           navigate('/provider/dashboard');
+        } else {
+          navigate('/');
         }
       } else {
         setError(response.data.message || 'Erreur de connexion');

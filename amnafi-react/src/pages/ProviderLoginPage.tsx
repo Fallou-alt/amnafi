@@ -29,8 +29,7 @@ export default function ProviderLoginPage() {
         localStorage.setItem('user', JSON.stringify(response.data.data.user));
         localStorage.setItem('provider', JSON.stringify(response.data.data.provider));
 
-        alert('Connexion réussie !');
-        navigate('/provider/profile');
+        navigate('/provider/dashboard');
       }
     } catch (error: any) {
       setError(error.response?.data?.message || 'Erreur de connexion');
