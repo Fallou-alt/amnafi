@@ -1,197 +1,126 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Phone, Lock, LogIn, Mail } from 'lucide-react';
+import { Phone, Lock } from 'lucide-react';
 import api from '../lib/api';
 
 export default function ConnexionPage() {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    phone: '',
-    email: '',
-    password: ''
-  });
-  
-  const [loginType, setLoginType] = useState<'phone' | 'email'>('phone');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [phone, setPhone] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
+    setLoading(true);
     setError('');
-    
+
     try {
-      const loginData = loginType === 'phone' 
-        ? { phone: formData.phone.trim(), password: formData.password }
-        : { email: formData.email.trim(), password: formData.password };
-        
-      const response = await api.post('/auth/login', loginData);
-      
+      const response = await api.post('/auth/login', {
+        phone: phone.trim(),
+        password,
+      });
+
       if (response.data.success) {
-        localStorage.setItem('token', response.data.data.token);
-        localStorage.setItem('user_data', JSON.stringify(response.data.data.user));
-        
-        if (response.data.data.user_type === 'admin') {
+        const { token, user, provider, user_type } = response.data.data;
+        localStorage.setItem('token', token);
+        localStorage.setItem('user_data', JSON.stringify(user));
+
+        if (user_type === 'admin') {
           navigate('/admin/dashboard');
-        } else if (response.data.data.user_type === 'provider') {
-          localStorage.setItem('provider_data', JSON.stringify(response.data.data.provider));
-          navigate('/provider/dashboard');
         } else {
-          navigate('/');
+          localStorage.setItem('provider_data', JSON.stringify(provider));
+          navigate('/provider/dashboard');
         }
-      } else {
-        setError(response.data.message || 'Erreur de connexion');
       }
-    } catch (error: any) {
-      setError(error.response?.data?.message || 'Erreur de connexion au serveur');
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Numéro ou mot de passe incorrect');
     } finally {
-      setIsSubmitting(false);
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50">
-      <nav className="bg-white shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <Link to="/" className="flex items-center space-x-3">
-              <img
-                src="/images/1logoamnafi.png"
-                alt="AMNAFI"
-                className="w-10 h-10"
-              />
-              <span className="text-2xl font-bold text-orange-600">AMNAFI</span>
-            </Link>
-            <div className="flex items-center space-x-4">
-              <Link to="/prestataire" className="text-gray-600 hover:text-orange-600">
-                Devenir prestataire
-              </Link>
-              <Link to="/" className="text-gray-600 hover:text-orange-600">
-                ← Retour à l'accueil
-              </Link>
-            </div>
-          </div>
-        </div>
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      <nav className="bg-white border-b px-4 py-3 flex items-center justify-between">
+        <Link to="/" className="flex items-center gap-2">
+          <img src="/images/1logoamnafi.png" alt="AMNAFI" className="w-8 h-8" />
+          <span className="font-bold text-orange-600 text-lg">AMNAFI</span>
+        </Link>
+        <Link to="/prestataire" className="text-sm text-orange-600 hover:underline">
+          Devenir prestataire
+        </Link>
       </nav>
 
-      <div className="max-w-md mx-auto px-4 py-12">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-2xl shadow-xl overflow-hidden"
-        >
-          <div className="bg-gradient-to-r from-orange-600 to-red-500 px-8 py-6 text-center">
-            <LogIn className="w-12 h-12 text-white mx-auto mb-2" />
-            <h1 className="text-2xl font-bold text-white">Connexion</h1>
-            <p className="text-orange-100 mt-1">Prestataires & Administrateurs</p>
+      <div className="flex-1 flex items-center justify-center px-4 py-12">
+        <div className="w-full max-w-sm">
+          <div className="text-center mb-8">
+            <h1 className="text-2xl font-bold text-gray-900">Espace prestataire</h1>
+            <p className="text-gray-500 mt-1 text-sm">Connectez-vous pour gérer votre profil</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="p-8 space-y-6">
+          <div className="bg-white rounded-2xl shadow-sm border p-6">
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm">
                 {error}
               </div>
             )}
 
-            <div className="flex bg-gray-100 rounded-lg p-1">
-              <button
-                type="button"
-                onClick={() => setLoginType('phone')}
-                className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-                  loginType === 'phone'
-                    ? 'bg-white text-orange-600 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                <Phone className="inline w-4 h-4 mr-1" />
-                Téléphone
-              </button>
-              <button
-                type="button"
-                onClick={() => setLoginType('email')}
-                className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-                  loginType === 'email'
-                    ? 'bg-white text-orange-600 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                <Mail className="inline w-4 h-4 mr-1" />
-                Email
-              </button>
-            </div>
-
-            {loginType === 'phone' ? (
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  <Phone className="inline w-4 h-4 mr-1" />
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Numéro de téléphone
                 </label>
-                <input
-                  type="tel"
-                  required
-                  placeholder="+221 XX XXX XX XX"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                />
+                <div className="relative">
+                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input
+                    type="tel"
+                    required
+                    placeholder="771234567"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
+                  />
+                </div>
               </div>
-            ) : (
+
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  <Mail className="inline w-4 h-4 mr-1" />
-                  Adresse email
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Mot de passe
                 </label>
-                <input
-                  type="email"
-                  required
-                  placeholder="admin@amnafi.com"
-                  value={formData.email}
-                  onChange={(e) => setFormData({...formData, email: e.target.value})}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                />
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input
+                    type="password"
+                    required
+                    placeholder="Votre mot de passe"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
+                  />
+                </div>
+                <p className="text-xs text-gray-400 mt-1">
+                  Par défaut : votre numéro de téléphone
+                </p>
               </div>
-            )}
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <Lock className="inline w-4 h-4 mr-1" />
-                Mot de passe
-              </label>
-              <input
-                type="password"
-                required
-                placeholder="Votre mot de passe"
-                value={formData.password}
-                onChange={(e) => setFormData({...formData, password: e.target.value})}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-              />
-            </div>
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-3 bg-orange-600 text-white rounded-lg font-semibold hover:bg-orange-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? 'Connexion...' : 'Se connecter'}
+              </button>
+            </form>
+          </div>
 
-            <motion.button
-              whileHover={{ scale: isSubmitting ? 1 : 1.02 }}
-              whileTap={{ scale: isSubmitting ? 1 : 0.98 }}
-              type="submit"
-              disabled={isSubmitting}
-              className={`w-full py-4 px-6 rounded-lg font-semibold text-lg transition-all ${
-                isSubmitting
-                  ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-orange-600 to-red-500 hover:shadow-lg'
-              } text-white`}
-            >
-              {isSubmitting ? 'Connexion...' : 'Se connecter'}
-            </motion.button>
-
-            <div className="text-center pt-4 border-t border-gray-200">
-              <p className="text-gray-600">
-                Pas encore inscrit ?{' '}
-                <Link to="/prestataire" className="text-orange-600 hover:text-orange-700 font-medium">
-                  Devenir prestataire
-                </Link>
-              </p>
-            </div>
-          </form>
-        </motion.div>
+          <p className="text-center text-sm text-gray-500 mt-6">
+            Pas encore prestataire ?{' '}
+            <Link to="/prestataire" className="text-orange-600 font-medium hover:underline">
+              Inscrivez-vous gratuitement
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );

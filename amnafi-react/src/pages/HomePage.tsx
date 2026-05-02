@@ -62,8 +62,8 @@ export default function HomePage() {
               <Link to="/prestataire" className="hidden sm:block px-3 md:px-4 py-2 text-sm md:text-base text-orange-600 border border-orange-600 rounded-lg hover:bg-orange-50 transition-colors">
                 Devenir Prestataire
               </Link>
-              <Link to="/provider/login" className="hidden sm:block px-3 md:px-4 py-2 text-sm md:text-base bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors">
-                Connexion
+              <Link to="/connexion" className="hidden sm:block px-3 md:px-4 py-2 text-sm md:text-base bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors">
+                Espace prestataire
               </Link>
               <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden p-2 text-gray-700 hover:text-orange-600 transition-colors">
                 <Menu className="w-6 h-6" />
@@ -86,8 +86,8 @@ export default function HomePage() {
                 <Link to="/prestataire" className="block w-full px-4 py-2 text-center text-orange-600 border border-orange-600 rounded-lg hover:bg-orange-50 transition-colors" onClick={() => setMobileMenuOpen(false)}>
                   Devenir Prestataire
                 </Link>
-                <Link to="/provider/login" className="block w-full px-4 py-2 text-center bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors" onClick={() => setMobileMenuOpen(false)}>
-                  Connexion
+                <Link to="/connexion" className="block w-full px-4 py-2 text-center bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors" onClick={() => setMobileMenuOpen(false)}>
+                  Espace prestataire
                 </Link>
               </div>
             </div>

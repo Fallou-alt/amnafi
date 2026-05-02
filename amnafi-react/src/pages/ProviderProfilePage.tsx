@@ -1,491 +1,315 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Camera, Save, ArrowLeft, User, Building, Image, Lock, MapPin } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { ArrowLeft, Save, Camera, User, Lock, MapPin } from 'lucide-react';
 import api from '../lib/api';
-
-interface Provider {
-  id: number;
-  business_name: string;
-  description: string;
-  phone: string;
-  city: string;
-  address: string;
-  profile_photo: string;
-  profile_photo_url: string;
-  cover_photo: string;
-  cover_photo_url: string;
-  geolocalisation_active?: boolean;
-  latitude?: number;
-  longitude?: number;
-  category: {
-    id: number;
-    name: string;
-  };
-}
 
 export default function ProviderProfilePage() {
   const navigate = useNavigate();
-  const [provider, setProvider] = useState<Provider | null>(null);
+  const profileInputRef = useRef<HTMLInputElement>(null);
+  const coverInputRef = useRef<HTMLInputElement>(null);
+
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-  
-  const [formData, setFormData] = useState({
+  const [msg, setMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  const [form, setForm] = useState({
     business_name: '',
     description: '',
     phone: '',
     city: '',
-    address: ''
+    address: '',
   });
 
-  const [profilePhoto, setProfilePhoto] = useState<File | null>(null);
-  const [coverPhoto, setCoverPhoto] = useState<File | null>(null);
-  const [profilePreview, setProfilePreview] = useState<string>('');
-  const [coverPreview, setCoverPreview] = useState<string>('');
+  const [photos, setPhotos] = useState<{ profile_url?: string; cover_url?: string }>({});
+  const [profileFile, setProfileFile] = useState<File | null>(null);
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [profilePreview, setProfilePreview] = useState('');
+  const [coverPreview, setCoverPreview] = useState('');
 
-  const [passwordData, setPasswordData] = useState({
-    current_password: '',
-    new_password: '',
-    new_password_confirmation: ''
-  });
+  const [pwd, setPwd] = useState({ current_password: '', new_password: '', new_password_confirmation: '' });
+  const [geo, setGeo] = useState<{ active: boolean; lat?: number; lng?: number }>({ active: false });
 
   useEffect(() => {
-    fetchProfile();
-  }, []);
+    api.get('/provider/profile')
+      .then((r) => {
+        const d = r.data.data;
+        setForm({
+          business_name: d.business_name || '',
+          description: d.description || '',
+          phone: d.phone || '',
+          city: d.city || '',
+          address: d.address || '',
+        });
+        setPhotos({ profile_url: d.profile_photo_url, cover_url: d.cover_photo_url });
+        setGeo({ active: !!d.geolocalisation_active, lat: d.latitude, lng: d.longitude });
+      })
+      .catch(() => navigate('/connexion'))
+      .finally(() => setLoading(false));
+  }, [navigate]);
 
-  const fetchProfile = async () => {
-    try {
-      const response = await api.get('/provider/profile');
-      const data = response.data.data;
-      setProvider(data);
-      setFormData({
-        business_name: data.business_name || '',
-        description: data.description || '',
-        phone: data.phone || '',
-        city: data.city || '',
-        address: data.address || ''
-      });
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Erreur de chargement');
-      if (err.response?.status === 401) {
-        navigate('/provider/login');
-      }
-    } finally {
-      setLoading(false);
-    }
+  const notify = (type: 'success' | 'error', text: string) => {
+    setMsg({ type, text });
+    setTimeout(() => setMsg(null), 4000);
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'profile' | 'cover') => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    if (type === 'profile') { setProfileFile(file); setProfilePreview(url); }
+    else { setCoverFile(file); setCoverPreview(url); }
   };
 
-  const handleProfilePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      setProfilePhoto(file);
-      setProfilePreview(URL.createObjectURL(file));
-    }
-  };
-
-  const handleCoverPhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      setCoverPhoto(file);
-      setCoverPreview(URL.createObjectURL(file));
-    }
-  };
-
-  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPasswordData({ ...passwordData, [e.target.name]: e.target.value });
-  };
-
-  const handleProfileUpdate = async (e: React.FormEvent) => {
+  const handleSaveInfo = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    setError('');
-    setSuccess('');
-
     try {
-      await api.put('/provider/profile', formData);
-      setSuccess('Profil mis à jour avec succès');
-      fetchProfile();
+      await api.put('/provider/profile', form);
+      notify('success', 'Profil mis à jour');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Erreur de mise à jour');
+      notify('error', err.response?.data?.message || 'Erreur');
     } finally {
       setSaving(false);
     }
   };
 
-  const handlePhotoUpload = async () => {
-    if (!profilePhoto && !coverPhoto) return;
-
+  const handleSavePhotos = async () => {
+    if (!profileFile && !coverFile) return;
     setSaving(true);
-    setError('');
-    setSuccess('');
-
-    const formDataUpload = new FormData();
-    if (profilePhoto) formDataUpload.append('profile_photo', profilePhoto);
-    if (coverPhoto) formDataUpload.append('cover_photo', coverPhoto);
-
+    const fd = new FormData();
+    if (profileFile) fd.append('profile_photo', profileFile);
+    if (coverFile) fd.append('cover_photo', coverFile);
     try {
-      await api.post('/provider/upload-photo', formDataUpload, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-      setSuccess('Photos mises à jour avec succès');
-      setProfilePhoto(null);
-      setCoverPhoto(null);
-      setProfilePreview('');
-      setCoverPreview('');
-      fetchProfile();
+      await api.post('/provider/upload-photo', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+      notify('success', 'Photos mises à jour');
+      setProfileFile(null); setCoverFile(null);
+      setProfilePreview(''); setCoverPreview('');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Erreur d\'upload');
+      notify('error', err.response?.data?.message || 'Erreur upload');
     } finally {
       setSaving(false);
     }
   };
 
-  const handlePasswordUpdate = async (e: React.FormEvent) => {
+  const handleSavePwd = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (passwordData.new_password !== passwordData.new_password_confirmation) {
-      setError('Les mots de passe ne correspondent pas');
+    if (pwd.new_password !== pwd.new_password_confirmation) {
+      notify('error', 'Les mots de passe ne correspondent pas');
       return;
     }
-
     setSaving(true);
-    setError('');
-    setSuccess('');
-
     try {
-      await api.put('/provider/password', passwordData);
-      setSuccess('Mot de passe modifié avec succès');
-      setPasswordData({
-        current_password: '',
-        new_password: '',
-        new_password_confirmation: ''
-      });
+      await api.put('/provider/password', pwd);
+      notify('success', 'Mot de passe modifié');
+      setPwd({ current_password: '', new_password: '', new_password_confirmation: '' });
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Erreur de modification du mot de passe');
+      notify('error', err.response?.data?.message || 'Erreur');
     } finally {
       setSaving(false);
     }
   };
 
-  const toggleGeolocation = async () => {
-    if (!provider) return;
-
-    if (!provider.geolocalisation_active) {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          async (position) => {
-            try {
-              await api.put('/provider/geolocation', {
-                geolocalisation_active: true,
-                latitude: position.coords.latitude,
-                longitude: position.coords.longitude
-              });
-              setSuccess('Géolocalisation activée avec succès');
-              fetchProfile();
-            } catch (err: any) {
-              setError(err.response?.data?.message || 'Erreur d\'activation de la géolocalisation');
-            }
-          },
-          () => {
-            setError('Impossible d\'obtenir votre position. Vérifiez les autorisations de géolocalisation.');
-          }
-        );
-      } else {
-        setError('La géolocalisation n\'est pas supportée par votre navigateur');
-      }
+  const handleToggleGeo = async () => {
+    if (!geo.active) {
+      navigator.geolocation?.getCurrentPosition(
+        async (pos) => {
+          try {
+            await api.put('/provider/geolocation', {
+              geolocalisation_active: true,
+              latitude: pos.coords.latitude,
+              longitude: pos.coords.longitude,
+            });
+            setGeo({ active: true, lat: pos.coords.latitude, lng: pos.coords.longitude });
+            notify('success', 'Géolocalisation activée');
+          } catch { notify('error', 'Erreur géolocalisation'); }
+        },
+        () => notify('error', 'Impossible d\'obtenir votre position')
+      );
     } else {
       try {
-        await api.put('/provider/geolocation', {
-          geolocalisation_active: false,
-          latitude: null,
-          longitude: null
-        });
-        setSuccess('Géolocalisation désactivée');
-        fetchProfile();
-      } catch (err: any) {
-        setError(err.response?.data?.message || 'Erreur de désactivation de la géolocalisation');
-      }
+        await api.put('/provider/geolocation', { geolocalisation_active: false, latitude: null, longitude: null });
+        setGeo({ active: false });
+        notify('success', 'Géolocalisation désactivée');
+      } catch { notify('error', 'Erreur'); }
     }
   };
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
+        <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-blue-50">
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-4xl mx-auto px-4 py-4">
-          <button 
-            onClick={() => navigate('/provider/dashboard')} 
-            className="flex items-center gap-2 text-orange-600 hover:text-orange-700 mb-2"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Retour au tableau de bord
-          </button>
-          <h1 className="text-2xl font-bold text-gray-900">Modifier mon profil</h1>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white border-b px-4 py-3 flex items-center gap-3 sticky top-0 z-10">
+        <Link to="/provider/dashboard" className="text-gray-500 hover:text-gray-700">
+          <ArrowLeft className="w-5 h-5" />
+        </Link>
+        <h1 className="font-bold text-gray-900">Mon profil</h1>
+      </header>
+
+      {/* Toast */}
+      {msg && (
+        <div className={`fixed top-16 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-lg text-sm font-medium shadow-lg ${
+          msg.type === 'success' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'
+        }`}>
+          {msg.text}
         </div>
-      </div>
+      )}
 
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl">
-            {error}
-          </div>
-        )}
+      <div className="max-w-xl mx-auto px-4 py-6 space-y-4">
 
-        {success && (
-          <div className="mb-6 p-4 bg-green-50 border border-green-200 text-green-700 rounded-xl">
-            {success}
-          </div>
-        )}
-
-        <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
-          <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
-            <Camera className="w-5 h-5 text-orange-600" />
-            Photos de profil
+        {/* Photos */}
+        <div className="bg-white rounded-2xl border p-5">
+          <h2 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <Camera className="w-4 h-4 text-orange-500" /> Photos
           </h2>
-          
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="grid grid-cols-2 gap-4">
+            {/* Photo profil */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">Photo de profil</label>
-              <div className="relative">
-                <div className="w-full h-48 bg-gray-100 rounded-xl overflow-hidden border-2 border-dashed border-gray-300">
-                  {profilePreview ? (
-                    <img src={profilePreview} alt="Aperçu profil" className="w-full h-full object-cover" />
-                  ) : provider?.profile_photo_url ? (
-                    <img src={provider.profile_photo_url} alt="Photo profil" className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <User className="w-12 h-12 text-gray-400" />
-                    </div>
-                  )}
-                </div>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleProfilePhotoChange}
-                  className="mt-3 w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100"
-                />
+              <p className="text-xs text-gray-500 mb-2">Photo de profil</p>
+              <div
+                className="w-full aspect-square rounded-xl bg-gray-100 overflow-hidden border-2 border-dashed border-gray-200 cursor-pointer hover:border-orange-400 transition flex items-center justify-center"
+                onClick={() => profileInputRef.current?.click()}
+              >
+                {profilePreview || photos.profile_url ? (
+                  <img src={profilePreview || photos.profile_url} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <User className="w-10 h-10 text-gray-300" />
+                )}
               </div>
+              <input ref={profileInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => handlePhotoChange(e, 'profile')} />
             </div>
-
+            {/* Photo couverture */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">Photo de couverture</label>
-              <div className="relative">
-                <div className="w-full h-48 bg-gray-100 rounded-xl overflow-hidden border-2 border-dashed border-gray-300">
-                  {coverPreview ? (
-                    <img src={coverPreview} alt="Aperçu couverture" className="w-full h-full object-cover" />
-                  ) : provider?.cover_photo_url ? (
-                    <img src={provider.cover_photo_url} alt="Photo couverture" className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <Image className="w-12 h-12 text-gray-400" />
-                    </div>
-                  )}
-                </div>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleCoverPhotoChange}
-                  className="mt-3 w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100"
-                />
+              <p className="text-xs text-gray-500 mb-2">Photo de couverture</p>
+              <div
+                className="w-full aspect-square rounded-xl bg-gray-100 overflow-hidden border-2 border-dashed border-gray-200 cursor-pointer hover:border-orange-400 transition flex items-center justify-center"
+                onClick={() => coverInputRef.current?.click()}
+              >
+                {coverPreview || photos.cover_url ? (
+                  <img src={coverPreview || photos.cover_url} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <Camera className="w-10 h-10 text-gray-300" />
+                )}
               </div>
+              <input ref={coverInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => handlePhotoChange(e, 'cover')} />
             </div>
           </div>
-
-          {(profilePhoto || coverPhoto) && (
+          {(profileFile || coverFile) && (
             <button
-              onClick={handlePhotoUpload}
+              onClick={handleSavePhotos}
               disabled={saving}
-              className="mt-6 px-6 py-3 bg-orange-600 text-white rounded-xl hover:bg-orange-700 disabled:opacity-50 flex items-center gap-2"
+              className="mt-4 w-full py-2.5 bg-orange-600 text-white rounded-lg text-sm font-medium hover:bg-orange-700 disabled:opacity-50 transition"
             >
-              <Camera className="w-4 h-4" />
-              {saving ? 'Upload en cours...' : 'Mettre à jour les photos'}
+              {saving ? 'Envoi...' : 'Enregistrer les photos'}
             </button>
           )}
         </div>
 
-        <div className="bg-white rounded-2xl shadow-lg p-6">
-          <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
-            <Building className="w-5 h-5 text-orange-600" />
-            Informations professionnelles
-          </h2>
-          
-          <form onSubmit={handleProfileUpdate} className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Nom de l'entreprise</label>
+        {/* Infos */}
+        <div className="bg-white rounded-2xl border p-5">
+          <h2 className="font-semibold text-gray-900 mb-4">Informations</h2>
+          <form onSubmit={handleSaveInfo} className="space-y-3">
+            {[
+              { name: 'business_name', label: 'Nom / Entreprise', type: 'text' },
+              { name: 'phone', label: 'Téléphone', type: 'tel' },
+              { name: 'city', label: 'Ville', type: 'text' },
+              { name: 'address', label: 'Adresse', type: 'text' },
+            ].map(({ name, label, type }) => (
+              <div key={name}>
+                <label className="block text-xs font-medium text-gray-600 mb-1">{label}</label>
                 <input
-                  type="text"
-                  name="business_name"
-                  value={formData.business_name}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                  required
+                  type={type}
+                  value={(form as any)[name]}
+                  onChange={(e) => setForm({ ...form, [name]: e.target.value })}
+                  className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                 />
               </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Téléphone</label>
-                <input
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                  required
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Ville</label>
-                <input
-                  type="text"
-                  name="city"
-                  value={formData.city}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                  required
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Adresse</label>
-                <input
-                  type="text"
-                  name="address"
-                  value={formData.address}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                />
-              </div>
-            </div>
-            
+            ))}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Description</label>
               <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleInputChange}
-                rows={4}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                placeholder="Décrivez vos services et votre expertise..."
+                value={form.description}
+                onChange={(e) => setForm({ ...form, description: e.target.value })}
+                rows={3}
+                className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none"
+                placeholder="Décrivez vos services..."
               />
             </div>
-            
             <button
               type="submit"
               disabled={saving}
-              className="w-full lg:w-auto px-8 py-3 bg-orange-600 text-white rounded-xl hover:bg-orange-700 disabled:opacity-50 flex items-center justify-center gap-2 font-medium"
+              className="w-full py-2.5 bg-orange-600 text-white rounded-lg text-sm font-medium hover:bg-orange-700 disabled:opacity-50 transition flex items-center justify-center gap-2"
             >
               <Save className="w-4 h-4" />
-              {saving ? 'Enregistrement...' : 'Enregistrer les modifications'}
+              {saving ? 'Enregistrement...' : 'Enregistrer'}
             </button>
           </form>
         </div>
 
-        {/* Section Mot de passe */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
-          <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
-            <Lock className="w-5 h-5 text-orange-600" />
-            Changer le mot de passe
+        {/* Mot de passe */}
+        <div className="bg-white rounded-2xl border p-5">
+          <h2 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <Lock className="w-4 h-4 text-orange-500" /> Mot de passe
           </h2>
-          
-          <form onSubmit={handlePasswordUpdate} className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Mot de passe actuel</label>
+          <form onSubmit={handleSavePwd} className="space-y-3">
+            {[
+              { name: 'current_password', label: 'Mot de passe actuel' },
+              { name: 'new_password', label: 'Nouveau mot de passe' },
+              { name: 'new_password_confirmation', label: 'Confirmer le nouveau' },
+            ].map(({ name, label }) => (
+              <div key={name}>
+                <label className="block text-xs font-medium text-gray-600 mb-1">{label}</label>
                 <input
                   type="password"
-                  name="current_password"
-                  value={passwordData.current_password}
-                  onChange={handlePasswordChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                  placeholder="Votre mot de passe actuel"
+                  value={(pwd as any)[name]}
+                  onChange={(e) => setPwd({ ...pwd, [name]: e.target.value })}
+                  className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                   required
                 />
               </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Nouveau mot de passe</label>
-                <input
-                  type="password"
-                  name="new_password"
-                  value={passwordData.new_password}
-                  onChange={handlePasswordChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                  placeholder="Nouveau mot de passe"
-                  required
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Confirmer le mot de passe</label>
-                <input
-                  type="password"
-                  name="new_password_confirmation"
-                  value={passwordData.new_password_confirmation}
-                  onChange={handlePasswordChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                  placeholder="Confirmer le mot de passe"
-                  required
-                />
-              </div>
-            </div>
-            
+            ))}
             <button
               type="submit"
               disabled={saving}
-              className="px-8 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2 font-medium"
+              className="w-full py-2.5 bg-gray-800 text-white rounded-lg text-sm font-medium hover:bg-gray-900 disabled:opacity-50 transition"
             >
-              <Lock className="w-4 h-4" />
-              {saving ? 'Modification...' : 'Modifier le mot de passe'}
+              {saving ? 'Modification...' : 'Changer le mot de passe'}
             </button>
           </form>
         </div>
 
-        {/* Section Géolocalisation */}
-        <div className="bg-white rounded-2xl shadow-lg p-6">
-          <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
-            <MapPin className="w-5 h-5 text-orange-600" />
-            Géolocalisation
-          </h2>
-          
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-            <div className="flex-1">
-              <p className="text-gray-600 mb-2">
-                Activez la géolocalisation pour apparaître dans les recherches à proximité des clients.
+        {/* Géolocalisation */}
+        <div className="bg-white rounded-2xl border p-5">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="font-semibold text-gray-900 flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-orange-500" /> Géolocalisation
+              </h2>
+              <p className="text-xs text-gray-500 mt-0.5">
+                {geo.active && geo.lat
+                  ? `Actif · ${geo.lat.toFixed(4)}, ${geo.lng?.toFixed(4)}`
+                  : 'Apparaître dans les recherches à proximité'}
               </p>
-              {provider?.geolocalisation_active && provider.latitude && provider.longitude && (
-                <p className="text-sm text-gray-500">
-                  Position actuelle : {provider.latitude.toFixed(6)}, {provider.longitude.toFixed(6)}
-                </p>
-              )}
             </div>
-            
             <button
-              onClick={toggleGeolocation}
-              className={`px-6 py-3 rounded-xl font-medium flex items-center gap-2 ${
-                provider?.geolocalisation_active
-                  ? 'bg-red-600 hover:bg-red-700 text-white'
-                  : 'bg-green-600 hover:bg-green-700 text-white'
+              onClick={handleToggleGeo}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+                geo.active
+                  ? 'bg-red-50 text-red-600 hover:bg-red-100'
+                  : 'bg-green-50 text-green-600 hover:bg-green-100'
               }`}
             >
-              <MapPin className="w-4 h-4" />
-              {provider?.geolocalisation_active ? 'Désactiver' : 'Activer'} la géolocalisation
+              {geo.active ? 'Désactiver' : 'Activer'}
             </button>
           </div>
         </div>
+
       </div>
     </div>
   );
