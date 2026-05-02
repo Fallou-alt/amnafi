@@ -124,37 +124,41 @@ export default function AllProviders() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {providers.map((provider) => (
                 <Link key={provider.id} to={`/prestataires/${provider.slug || provider.id}`}
-                  className="bg-white rounded-xl border border-gray-100 hover:border-orange-200 hover:shadow-md transition-all overflow-hidden block">
-                  <div className="h-28 bg-gradient-to-r from-orange-100 to-red-100 overflow-hidden relative">
-                    {provider.cover_photo && (
-                      <img src={`https://amnafi.net/backend/public/storage/${provider.cover_photo}`} alt="" className="w-full h-full object-cover" />
-                    )}
-                    {provider.is_premium && (
-                      <span className="absolute top-2 right-2 bg-yellow-400 text-yellow-900 text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
-                        <Crown className="w-3 h-3" /> Premium
-                      </span>
-                    )}
+                  className="bg-white rounded-xl border border-gray-100 hover:border-orange-200 hover:shadow-md transition-all overflow-visible block">
+                  {/* Cover + photo de profil superposée */}
+                  <div className="relative">
+                    <div className="h-28 bg-gradient-to-r from-orange-100 to-red-100 overflow-hidden rounded-t-xl">
+                      {provider.cover_photo && (
+                        <img src={`https://amnafi.net/backend/public/storage/${provider.cover_photo}`} alt="" className="w-full h-full object-cover" />
+                      )}
+                      {provider.is_premium && (
+                        <span className="absolute top-2 right-2 bg-yellow-400 text-yellow-900 text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-1 z-10">
+                          <Crown className="w-3 h-3" /> Premium
+                        </span>
+                      )}
+                    </div>
+                    {/* Photo de profil — devant la cover */}
+                    <div className="absolute -bottom-7 left-4 z-10 w-14 h-14 rounded-xl border-2 border-white shadow-md bg-orange-50 overflow-hidden">
+                      {provider.profile_photo_url || provider.profile_photo ? (
+                        <img src={provider.profile_photo_url || `https://amnafi.net/backend/public/storage/${provider.profile_photo}`}
+                          alt={provider.business_name} className="w-full h-full object-cover"
+                          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-orange-100">
+                          <span className="text-orange-600 font-bold text-lg">{provider.business_name.charAt(0)}</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <div className="p-4">
-                    <div className="flex items-center gap-3 -mt-8 mb-3">
-                      <div className="w-14 h-14 rounded-xl border-2 border-white shadow bg-orange-50 overflow-hidden shrink-0">
-                        {provider.profile_photo_url || provider.profile_photo ? (
-                          <img src={provider.profile_photo_url || `https://amnafi.net/backend/public/storage/${provider.profile_photo}`}
-                            alt={provider.business_name} className="w-full h-full object-cover"
-                            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-orange-100">
-                            <span className="text-orange-600 font-bold text-lg">{provider.business_name.charAt(0)}</span>
-                          </div>
-                        )}
-                      </div>
-                      <div className="pt-6 min-w-0">
-                        <h3 className="font-semibold text-gray-900 text-sm truncate flex items-center gap-1">
-                          {provider.business_name}
-                          {provider.is_verified && <CheckCircle className="w-3.5 h-3.5 text-blue-500 shrink-0" />}
-                        </h3>
-                        <p className="text-xs text-gray-400 truncate">{provider.user?.name}</p>
-                      </div>
+
+                  <div className="px-4 pt-10 pb-4">
+                    {/* Nom */}
+                    <div className="mb-2">
+                      <h3 className="font-semibold text-gray-900 text-sm truncate flex items-center gap-1">
+                        {provider.business_name}
+                        {provider.is_verified && <CheckCircle className="w-3.5 h-3.5 text-blue-500 shrink-0" />}
+                      </h3>
+                      <p className="text-xs text-gray-400 truncate">{provider.user?.name}</p>
                     </div>
                     {provider.category && (
                       <span className="inline-flex items-center gap-1 text-xs bg-orange-50 text-orange-700 px-2 py-0.5 rounded-full mb-3">
@@ -171,11 +175,14 @@ export default function AllProviders() {
                         <span className="font-medium">{parseFloat(provider.rating).toFixed(1)}</span>
                         <span className="text-gray-400">({provider.reviews_count})</span>
                       </div>
-                      <div className="flex gap-2" onClick={(e) => e.preventDefault()}>
-                        <a href={`tel:${provider.phone}`} className="p-2 bg-orange-50 text-orange-600 rounded-lg hover:bg-orange-100 transition" title="Appeler">
+                      <div className="flex gap-2">
+                        <a href={`tel:${provider.phone}`}
+                          onClick={(e) => e.stopPropagation()}
+                          className="p-2 bg-orange-50 text-orange-600 rounded-lg hover:bg-orange-100 transition" title="Appeler">
                           <Phone className="w-4 h-4" />
                         </a>
                         <a href={provider.whatsapp_url} target="_blank" rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
                           className="p-2 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition" title="WhatsApp">
                           <MessageCircle className="w-4 h-4" />
                         </a>
