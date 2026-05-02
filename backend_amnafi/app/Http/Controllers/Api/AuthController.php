@@ -25,8 +25,15 @@ class AuthController extends Controller
             $user = User::where('email', $request->email)->first();
         } elseif ($request->has('phone') && $request->phone) {
             $phone = preg_replace('/[^0-9]/', '', $request->phone);
+            // Chercher toutes les variantes : 784282776, +221784282776, 221784282776
+            $phoneWithPrefix = '221' . ltrim($phone, '221');
+            $phoneWithPlus = '+' . $phoneWithPrefix;
+            $phoneShort = strlen($phone) > 9 ? substr($phone, -9) : $phone;
+            
             $user = User::where('phone', $phone)
-                ->orWhere('phone', '+' . $phone)
+                ->orWhere('phone', $phoneWithPlus)
+                ->orWhere('phone', $phoneWithPrefix)
+                ->orWhere('phone', $phoneShort)
                 ->orWhere('phone', $request->phone)
                 ->first();
         }
