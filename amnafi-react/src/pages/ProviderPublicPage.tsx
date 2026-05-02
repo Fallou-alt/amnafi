@@ -63,46 +63,47 @@ export default function ProviderPublicPage() {
       </div>
 
       <div className="max-w-2xl mx-auto pb-16">
-        {/* Cover */}
-        <div className="h-52 overflow-hidden relative">
-          {coverUrl ? (
-            <img src={coverUrl} alt="Couverture" className="w-full h-full object-cover" />
-          ) : (
-            <div className="w-full h-full bg-gradient-to-r from-orange-400 to-orange-600" />
-          )}
-          {provider.is_premium && (
-            <span className="absolute top-3 right-3 bg-yellow-400 text-yellow-900 text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1 shadow">
-              <Crown className="w-3 h-3" /> Premium
-            </span>
-          )}
+        {/* Cover + photo superposée */}
+        <div className="relative">
+          <div className="h-52 overflow-hidden">
+            {coverUrl ? (
+              <img src={coverUrl} alt="Couverture" className="w-full h-full object-cover" />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-r from-orange-400 to-orange-600" />
+            )}
+            {provider.is_premium && (
+              <span className="absolute top-3 right-3 bg-yellow-400 text-yellow-900 text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1 shadow z-10">
+                <Crown className="w-3 h-3" /> Premium
+              </span>
+            )}
+          </div>
+          {/* Photo de profil devant la cover */}
+          <div className="absolute -bottom-12 left-5 z-20 w-24 h-24 rounded-2xl border-4 border-white shadow-lg bg-orange-50 overflow-hidden">
+            {photoUrl ? (
+              <img src={photoUrl} alt={provider.business_name} className="w-full h-full object-cover"
+                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-orange-100">
+                <span className="text-orange-600 font-bold text-4xl">{provider.business_name?.charAt(0)}</span>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Carte principale */}
         <div className="bg-white shadow-sm">
-          {/* Avatar + nom */}
-          <div className="px-5 pb-5">
-            <div className="flex items-end gap-4 -mt-12 mb-4">
-              <div className="w-24 h-24 rounded-2xl border-4 border-white shadow-lg bg-orange-50 overflow-hidden shrink-0">
-                {photoUrl ? (
-                  <img src={photoUrl} alt={provider.business_name} className="w-full h-full object-cover"
-                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-orange-100">
-                    <span className="text-orange-600 font-bold text-4xl">{provider.business_name?.charAt(0)}</span>
-                  </div>
-                )}
-              </div>
-              <div className="pb-2 min-w-0 flex-1">
-                <h1 className="text-xl font-bold text-gray-900 flex items-center gap-2 flex-wrap">
-                  {provider.business_name}
-                  {provider.is_verified && <CheckCircle className="w-5 h-5 text-blue-500 shrink-0" />}
-                </h1>
-                {provider.category?.name && (
-                  <span className="inline-flex items-center gap-1 text-xs bg-orange-50 text-orange-700 px-2 py-0.5 rounded-full mt-1">
-                    {provider.category.icon} {provider.category.name}
-                  </span>
-                )}
-              </div>
+          <div className="px-5 pb-5 pt-16">
+            {/* Nom + catégorie */}
+            <div className="mb-4">
+              <h1 className="text-xl font-bold text-gray-900 flex items-center gap-2 flex-wrap">
+                {provider.business_name}
+                {provider.is_verified && <CheckCircle className="w-5 h-5 text-blue-500 shrink-0" />}
+              </h1>
+              {provider.category?.name && (
+                <span className="inline-flex items-center gap-1 text-xs bg-orange-50 text-orange-700 px-2 py-0.5 rounded-full mt-1">
+                  {provider.category.icon} {provider.category.name}
+                </span>
+              )}
             </div>
 
             {/* Infos */}
