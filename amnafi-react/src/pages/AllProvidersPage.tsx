@@ -18,14 +18,8 @@ interface Provider {
   cover_photo: string;
   profile_photo_url: string;
   whatsapp_url: string;
-  user: {
-    name: string;
-  };
-  category: {
-    name: string;
-    icon: string;
-    color: string;
-  };
+  user: { name: string };
+  category: { name: string; icon: string; color: string };
 }
 
 interface Category {
@@ -39,260 +33,256 @@ export default function AllProviders() {
   const [providers, setProviders] = useState<Provider[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [total, setTotal] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [lastPage, setLastPage] = useState(1);
+
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category_id') || '');
   const [selectedCity, setSelectedCity] = useState(searchParams.get('city') || '');
 
   useEffect(() => {
-    fetchCategories();
-    fetchProviders(searchTerm, selectedCategory, selectedCity);
+    api.get('/public/categories').then((r) => {
+      if (r.data.success) setCategories(r.data.data);
+    });
+    fetchProviders(searchParams.get('search') || '', searchParams.get('category_id') || '', searchParams.get('city') || '', 1, true);
   }, []);
 
-  const fetchProviders = async (search = '', categoryId = '', city = '') => {
+  const fetchProviders = async (search: string, categoryId: string, city: string, page: number, reset: boolean) => {
+    reset ? setLoading(true) : setLoadingMore(true);
     try {
-      let url = '/public/providers';
       const params = new URLSearchParams();
       if (search) params.append('search', search);
       if (categoryId) params.append('category_id', categoryId);
       if (city) params.append('city', city);
-      if (params.toString()) url += '?' + params.toString();
-      
-      const response = await api.get(url);
-      
-      if (response.data.success) {
-        setProviders(response.data.data.data || response.data.data);
+      params.append('page', String(page));
+      params.append('per_page', '24');
+
+      const r = await api.get('/public/providers?' + params.toString());
+      if (r.data.success) {
+        const paged = r.data.data;
+        const items: Provider[] = paged.data || paged;
+        setProviders((prev) => reset ? items : [...prev, ...items]);
+        setTotal(paged.total ?? items.length);
+        setCurrentPage(paged.current_page ?? 1);
+        setLastPage(paged.last_page ?? 1);
       }
-    } catch (error) {
-      console.error('Erreur:', error);
+    } catch (e) {
+      console.error(e);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const fetchCategories = async () => {
-    try {
-      const response = await api.get('/public/categories');
-      if (response.data.success) {
-        setCategories(response.data.data);
-      }
-    } catch (error) {
-      console.error('Erreur:', error);
+      setLoadingMore(false);
     }
   };
 
   const handleSearch = () => {
-    setLoading(true);
-    fetchProviders(searchTerm, selectedCategory, selectedCity);
+    setCurrentPage(1);
+    fetchProviders(searchTerm, selectedCategory, selectedCity, 1, true);
   };
 
-  const handleCategoryChange = (categoryId: string) => {
-    setSelectedCategory(categoryId);
-    setLoading(true);
-    fetchProviders(searchTerm, categoryId, selectedCity);
+  const handleCategoryChange = (val: string) => {
+    setSelectedCategory(val);
+    fetchProviders(searchTerm, val, selectedCity, 1, true);
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Chargement...</p>
-        </div>
-      </div>
-    );
-  }
+  const handleCityChange = (val: string) => {
+    setSelectedCity(val);
+    fetchProviders(searchTerm, selectedCategory, val, 1, true);
+  };
+
+  const handleLoadMore = () => {
+    const next = currentPage + 1;
+    setCurrentPage(next);
+    fetchProviders(searchTerm, selectedCategory, selectedCity, next, false);
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-red-50">
-      <SEO title="Tous les prestataires" description="Trouvez parmi tous nos prestataires de services au Sénégal : coiffure, informatique, plomberie, électricité et plus encore." url="/prestataires" />
-      <div className="bg-white/90 backdrop-blur-md shadow-xl border-b border-orange-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center space-x-4">
-              <Link to="/" className="flex items-center text-orange-600 hover:text-orange-700 transition-colors">
-                <ArrowLeft className="w-5 h-5 mr-2" />
-                Retour
-              </Link>
-              <div>
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">Tous les prestataires</h1>
-                <p className="text-gray-600 font-medium">{providers.length} prestataires disponibles</p>
-              </div>
+    <div className="min-h-screen bg-gray-50">
+      <SEO title="Tous les prestataires" description="Trouvez parmi tous nos prestataires de services au Sénégal." url="/prestataires" />
+
+      {/* Header */}
+      <div className="bg-white border-b sticky top-0 z-10">
+        <div className="max-w-5xl mx-auto px-4 py-4 space-y-3">
+          <div className="flex items-center gap-3">
+            <Link to="/" className="text-gray-400 hover:text-gray-600">
+              <ArrowLeft className="w-5 h-5" />
+            </Link>
+            <div>
+              <h1 className="font-bold text-gray-900 text-lg">Prestataires</h1>
+              {!loading && (
+                <p className="text-xs text-gray-400">{total} prestataire{total > 1 ? 's' : ''}</p>
+              )}
             </div>
           </div>
 
-          <div className="bg-gradient-to-r from-orange-50 via-red-50 to-orange-50 p-4 rounded-2xl shadow-lg border-2 border-orange-200">
-            <div className="flex flex-col gap-4">
-              <div className="relative">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-orange-400 w-5 h-5" />
-                <input
-                  type="text"
-                  placeholder="Rechercher par nom, métier, ville..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 border-2 border-orange-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-400 transition-all shadow-sm bg-white/80 backdrop-blur-sm text-gray-900 placeholder-gray-500 font-medium"
-                  onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                />
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <select
-                  value={selectedCategory}
-                  onChange={(e) => handleCategoryChange(e.target.value)}
-                  className="px-4 py-3 border-2 border-orange-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-400 transition-all shadow-sm bg-white/80 backdrop-blur-sm font-medium"
-                >
-                  <option value="">Toutes les catégories</option>
-                  {categories.map((category) => (
-                    <option key={category.id} value={category.id}>
-                      {category.icon} {category.name}
-                    </option>
-                  ))}
-                </select>
-                <select
-                  value={selectedCity}
-                  onChange={(e) => { setSelectedCity(e.target.value); setLoading(true); fetchProviders(searchTerm, selectedCategory, e.target.value); }}
-                  className="px-4 py-3 border-2 border-orange-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-400 transition-all shadow-sm bg-white/80 backdrop-blur-sm font-medium"
-                >
-                  <option value="">Toutes les villes</option>
-                  <option value="dakar">Dakar</option>
-                  <option value="thies">Thiès</option>
-                  <option value="kaolack">Kaolack</option>
-                  <option value="ziguinchor">Ziguinchor</option>
-                  <option value="saint-louis">Saint-Louis</option>
-                  <option value="tambacounda">Tambacounda</option>
-                  <option value="mbour">Mbour</option>
-                  <option value="diourbel">Diourbel</option>
-                  <option value="louga">Louga</option>
-                  <option value="kolda">Kolda</option>
-                </select>
-                <button
-                  onClick={handleSearch}
-                  className="px-6 py-3 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-xl hover:from-orange-700 hover:to-red-700 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl transition-all font-bold transform hover:scale-105"
-                >
-                  <Search className="w-5 h-5" />
-                  <span>Rechercher</span>
-                </button>
-              </div>
+          {/* Filtres */}
+          <div className="flex flex-col sm:flex-row gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Nom, métier, ville..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              />
             </div>
+            <select
+              value={selectedCategory}
+              onChange={(e) => handleCategoryChange(e.target.value)}
+              className="px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 bg-white"
+            >
+              <option value="">Toutes catégories</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>{c.icon} {c.name}</option>
+              ))}
+            </select>
+            <select
+              value={selectedCity}
+              onChange={(e) => handleCityChange(e.target.value)}
+              className="px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 bg-white"
+            >
+              <option value="">Toutes villes</option>
+              {['Dakar','Thiès','Kaolack','Ziguinchor','Saint-Louis','Tambacounda','Mbour','Diourbel','Louga','Kolda'].map((v) => (
+                <option key={v} value={v.toLowerCase()}>{v}</option>
+              ))}
+            </select>
+            <button
+              onClick={handleSearch}
+              className="px-4 py-2.5 bg-orange-600 text-white rounded-lg text-sm font-medium hover:bg-orange-700 transition"
+            >
+              Rechercher
+            </button>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {providers.length === 0 ? (
-          <div className="text-center py-12">
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              {searchTerm ? `Aucun prestataire trouvé pour "${searchTerm}"` : 'Aucun prestataire trouvé'}
-            </h3>
-            <p className="text-gray-600 mb-4">
-              {searchTerm ? 'Ce métier ou service n\'est pas encore disponible sur notre plateforme' : 'Essayez de modifier vos critères de recherche'}
-            </p>
-            <Link to="/prestataire" className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-              Devenir prestataire
+      {/* Contenu */}
+      <div className="max-w-5xl mx-auto px-4 py-6">
+        {loading ? (
+          <div className="flex justify-center py-20">
+            <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : providers.length === 0 ? (
+          <div className="text-center py-16">
+            <p className="text-gray-500 mb-2">Aucun prestataire trouvé</p>
+            <Link to="/prestataire" className="text-orange-600 text-sm hover:underline">
+              Devenir prestataire →
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {providers.map((provider) => (
-              <div key={provider.id} className="group bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 border-2 border-orange-100 hover:border-orange-300 overflow-hidden transform hover:-translate-y-3 hover:scale-105">
-                <div className="relative h-48 bg-gradient-to-r from-orange-400 via-red-400 to-orange-400 overflow-hidden">
-                  {provider.cover_photo ? (
-                    <img
-                      src={`https://amnafi.net/backend/public/storage/${provider.cover_photo}`}
-                      alt="Couverture"
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-orange-300 via-red-300 to-orange-300 opacity-60"></div>
-                  )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
-                </div>
-                
-                {provider.is_premium && (
-                  <div className="absolute top-4 right-4 bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 text-white px-4 py-2 rounded-full text-xs font-bold flex items-center gap-2 shadow-2xl animate-pulse ring-2 ring-white">
-                    <Crown className="w-5 h-5" />
-                    PREMIUM
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {providers.map((provider) => (
+                <div
+                  key={provider.id}
+                  className="bg-white rounded-xl border border-gray-100 hover:border-orange-200 hover:shadow-md transition-all overflow-hidden"
+                >
+                  {/* Cover */}
+                  <div className="h-28 bg-gradient-to-r from-orange-100 to-red-100 overflow-hidden relative">
+                    {provider.cover_photo && (
+                      <img
+                        src={`https://amnafi.net/backend/public/storage/${provider.cover_photo}`}
+                        alt=""
+                        className="w-full h-full object-cover"
+                      />
+                    )}
+                    {provider.is_premium && (
+                      <span className="absolute top-2 right-2 bg-yellow-400 text-yellow-900 text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                        <Crown className="w-3 h-3" /> Premium
+                      </span>
+                    )}
                   </div>
-                )}
-                
-                <div className="p-6 relative bg-gradient-to-b from-white to-orange-50/30">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center space-x-3">
-                      <div className="relative">
-                        <div className="w-20 h-20 bg-gradient-to-br from-orange-200 to-red-200 rounded-2xl overflow-hidden ring-4 ring-white shadow-xl transform group-hover:rotate-6 transition-transform duration-500">
-                          {provider.profile_photo_url || provider.profile_photo ? (
-                            <img
-                              src={provider.profile_photo_url || `https://amnafi.net/backend/public/storage/${provider.profile_photo}`}
-                              alt={provider.business_name}
-                              className="w-full h-full object-cover"
-                              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                            />
-                          ) : (
-                            <div className="w-full h-full bg-gradient-to-br from-orange-400 to-red-400 flex items-center justify-center">
-                              <span className="text-white font-bold text-2xl">{provider.business_name.charAt(0)}</span>
-                            </div>
-                          )}
-                        </div>
-                        {provider.is_verified && (
-                          <div className="absolute -bottom-2 -right-2 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full p-2 ring-4 ring-white shadow-xl">
-                            <CheckCircle className="w-5 h-5 text-white" />
+
+                  <div className="p-4">
+                    {/* Avatar + nom */}
+                    <div className="flex items-center gap-3 -mt-8 mb-3">
+                      <div className="w-14 h-14 rounded-xl border-2 border-white shadow bg-orange-50 overflow-hidden shrink-0">
+                        {provider.profile_photo_url || provider.profile_photo ? (
+                          <img
+                            src={provider.profile_photo_url || `https://amnafi.net/backend/public/storage/${provider.profile_photo}`}
+                            alt={provider.business_name}
+                            className="w-full h-full object-cover"
+                            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-orange-100">
+                            <span className="text-orange-600 font-bold text-lg">{provider.business_name.charAt(0)}</span>
                           </div>
                         )}
                       </div>
-                      <div>
-                        <h3 className="font-bold text-xl text-gray-900 flex items-center gap-2">
+                      <div className="pt-6 min-w-0">
+                        <h3 className="font-semibold text-gray-900 text-sm truncate flex items-center gap-1">
                           {provider.business_name}
+                          {provider.is_verified && <CheckCircle className="w-3.5 h-3.5 text-blue-500 shrink-0" />}
                         </h3>
-                        <p className="text-sm text-gray-600 font-medium">{provider.user.name}</p>
+                        <p className="text-xs text-gray-400 truncate">{provider.user?.name}</p>
+                      </div>
+                    </div>
+
+                    {/* Catégorie */}
+                    {provider.category && (
+                      <span className="inline-flex items-center gap-1 text-xs bg-orange-50 text-orange-700 px-2 py-0.5 rounded-full mb-3">
+                        {provider.category.icon} {provider.category.name}
+                      </span>
+                    )}
+
+                    {/* Infos */}
+                    <div className="space-y-1 mb-3">
+                      <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                        <MapPin className="w-3.5 h-3.5 shrink-0" /> {provider.city}
+                      </div>
+                      <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                        <Phone className="w-3.5 h-3.5 shrink-0" /> {provider.phone}
+                      </div>
+                    </div>
+
+                    {/* Footer */}
+                    <div className="flex items-center justify-between pt-3 border-t border-gray-50">
+                      <div className="flex items-center gap-1 text-xs text-gray-600">
+                        <Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" />
+                        <span className="font-medium">{parseFloat(provider.rating).toFixed(1)}</span>
+                        <span className="text-gray-400">({provider.reviews_count})</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <a
+                          href={`tel:${provider.phone}`}
+                          className="p-2 bg-orange-50 text-orange-600 rounded-lg hover:bg-orange-100 transition"
+                          title="Appeler"
+                        >
+                          <Phone className="w-4 h-4" />
+                        </a>
+                        <a
+                          href={provider.whatsapp_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-2 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition"
+                          title="WhatsApp"
+                        >
+                          <MessageCircle className="w-4 h-4" />
+                        </a>
                       </div>
                     </div>
                   </div>
-
-                  {provider.category && (
-                    <div className="inline-flex items-center bg-gradient-to-r from-orange-100 via-red-100 to-orange-100 px-4 py-2 rounded-full mb-4 shadow-sm">
-                      <span className="text-lg mr-2">{provider.category.icon}</span>
-                      <span className="text-sm text-gray-800 font-bold">{provider.category.name}</span>
-                    </div>
-                  )}
-
-                  <div className="space-y-3 mb-6">
-                    <div className="flex items-center text-sm text-gray-700 bg-gradient-to-r from-orange-50 to-red-50 px-4 py-3 rounded-xl shadow-sm">
-                      <MapPin className="w-5 h-5 mr-3 text-orange-600" />
-                      <span className="font-semibold">{provider.city}</span>
-                    </div>
-                    <div className="flex items-center text-sm text-gray-700 bg-gradient-to-r from-red-50 to-orange-50 px-4 py-3 rounded-xl shadow-sm">
-                      <Phone className="w-5 h-5 mr-3 text-red-600" />
-                      <span className="font-semibold">{provider.phone}</span>
-                    </div>
-                  </div>
-
-                  <div className="border-t-2 border-orange-100 pt-4 flex items-center justify-between">
-                    <div className="flex items-center space-x-2 bg-gradient-to-r from-yellow-50 via-orange-50 to-red-50 px-4 py-3 rounded-xl shadow-sm">
-                      <Star className="w-6 h-6 text-yellow-500 fill-current" />
-                      <span className="text-lg font-bold text-gray-900">{parseFloat(provider.rating).toFixed(1)}</span>
-                      <span className="text-xs text-gray-500 font-medium">({provider.reviews_count})</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <a
-                        href={`tel:${provider.phone}`}
-                        className="bg-gradient-to-r from-orange-600 to-red-600 text-white p-4 rounded-xl hover:from-orange-700 hover:to-red-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-110"
-                        title="Appeler"
-                      >
-                        <Phone className="w-5 h-5" />
-                      </a>
-                      <a
-                        href={provider.whatsapp_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="bg-gradient-to-r from-green-600 to-emerald-600 text-white p-4 rounded-xl hover:from-green-700 hover:to-emerald-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-110"
-                        title="WhatsApp"
-                      >
-                        <MessageCircle className="w-5 h-5" />
-                      </a>
-                    </div>
-                  </div>
                 </div>
+              ))}
+            </div>
+
+            {/* Charger plus */}
+            {currentPage < lastPage && (
+              <div className="flex justify-center mt-8">
+                <button
+                  onClick={handleLoadMore}
+                  disabled={loadingMore}
+                  className="px-6 py-2.5 border border-gray-200 rounded-lg text-sm text-gray-600 hover:border-orange-400 hover:text-orange-600 transition disabled:opacity-50"
+                >
+                  {loadingMore ? 'Chargement...' : `Voir plus (${total - providers.length} restants)`}
+                </button>
               </div>
-            ))}
-          </div>
+            )}
+          </>
         )}
       </div>
     </div>
