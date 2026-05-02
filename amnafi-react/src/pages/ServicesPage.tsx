@@ -1,105 +1,57 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { ArrowLeft, Users } from 'lucide-react';
-import { motion } from 'framer-motion';
 import api from '../lib/api';
 
-interface Category {
-  id: number;
-  name: string;
-  icon: string;
-  color: string;
-  providers_count: number;
-}
-
 export default function ServicesPage() {
-  const navigate = useNavigate();
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchCategories();
+    api.get('/public/categories')
+      .then((r) => { if (r.data.success) setCategories(r.data.data); })
+      .finally(() => setLoading(false));
   }, []);
-
-  const fetchCategories = async () => {
-    try {
-      const response = await api.get('/public/categories');
-      if (response.data.success) {
-        setCategories(response.data.data);
-      }
-    } catch (error) {
-      console.error('Erreur:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getColorClasses = (color: string) => {
-    const colors = {
-      blue: 'bg-gradient-to-br from-blue-100 to-blue-200 border-blue-300 hover:from-blue-200 hover:to-blue-300',
-      pink: 'bg-gradient-to-br from-pink-100 to-pink-200 border-pink-300 hover:from-pink-200 hover:to-pink-300',
-      red: 'bg-gradient-to-br from-red-100 to-red-200 border-red-300 hover:from-red-200 hover:to-red-300',
-      purple: 'bg-gradient-to-br from-purple-100 to-purple-200 border-purple-300 hover:from-purple-200 hover:to-purple-300',
-      green: 'bg-gradient-to-br from-green-100 to-green-200 border-green-300 hover:from-green-200 hover:to-green-300',
-      orange: 'bg-gradient-to-br from-orange-100 to-orange-200 border-orange-300 hover:from-orange-200 hover:to-orange-300',
-      indigo: 'bg-gradient-to-br from-indigo-100 to-indigo-200 border-indigo-300 hover:from-indigo-200 hover:to-indigo-300',
-      yellow: 'bg-gradient-to-br from-yellow-100 to-yellow-200 border-yellow-300 hover:from-yellow-200 hover:to-yellow-300',
-      teal: 'bg-gradient-to-br from-teal-100 to-teal-200 border-teal-300 hover:from-teal-200 hover:to-teal-300',
-      gray: 'bg-gradient-to-br from-gray-100 to-gray-200 border-gray-300 hover:from-gray-200 hover:to-gray-300'
-    };
-    return colors[color as keyof typeof colors] || colors.blue;
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Chargement...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center space-x-4 mb-6">
-            <Link to="/" className="flex items-center text-orange-600 hover:text-orange-700">
-              <ArrowLeft className="w-5 h-5 mr-2" />
-              Retour
-            </Link>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Services par catégorie</h1>
-              <p className="text-gray-600">Découvrez nos prestataires organisés par métier</p>
-            </div>
-          </div>
+      {/* Header */}
+      <div className="bg-white border-b px-4 py-4 flex items-center gap-3">
+        <Link to="/" className="text-gray-400 hover:text-gray-600">
+          <ArrowLeft className="w-5 h-5" />
+        </Link>
+        <div>
+          <h1 className="font-bold text-gray-900">Services</h1>
+          <p className="text-xs text-gray-400">Trouvez un prestataire par métier</p>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-          {categories.map((category) => (
-            <motion.div
-              key={category.id}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              whileHover={{ scale: 1.05 }}
-              onClick={() => navigate(`/categories?category=${category.id}`)}
-              className={`rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border-2 p-6 ${getColorClasses(category.color)}`}
-            >
-              <div className="text-center">
-                <div className="text-4xl mb-4">{category.icon}</div>
-                <h3 className="font-semibold text-gray-900 mb-2">{category.name}</h3>
-                <div className="flex items-center justify-center space-x-1 text-sm text-gray-600">
-                  <Users className="w-4 h-4" />
-                  <span>{category.providers_count}</span>
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+      <div className="max-w-3xl mx-auto px-4 py-6">
+        {loading ? (
+          <div className="flex justify-center py-20">
+            <div className="w-7 h-7 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {categories.map((cat) => (
+              <Link
+                key={cat.id}
+                to={`/prestataires?category_id=${cat.id}`}
+                className="bg-white rounded-xl border border-gray-100 hover:border-orange-300 hover:shadow-sm transition p-4 flex flex-col items-center text-center gap-2 group"
+              >
+                <span className="text-3xl">{cat.icon}</span>
+                <p className="text-sm font-medium text-gray-800 group-hover:text-orange-600 transition leading-tight">
+                  {cat.name}
+                </p>
+                {cat.providers_count > 0 && (
+                  <span className="flex items-center gap-1 text-xs text-gray-400">
+                    <Users className="w-3 h-3" /> {cat.providers_count}
+                  </span>
+                )}
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

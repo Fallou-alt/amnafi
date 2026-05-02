@@ -23,6 +23,7 @@ import AdminLoginPage from './pages/AdminLoginPage';
 import AdminProviderDetailPage from './pages/AdminProviderDetailPage';
 import AdminGuard from './components/AdminGuard';
 import AdminLayout from './components/AdminLayout';
+import ProviderPublicPage from './pages/ProviderPublicPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import JojOfficialProvidersPage from './pages/JojOfficialProvidersPage';
 import JojMissionsPage from './pages/JojMissionsPage';
@@ -61,6 +62,7 @@ function App() {
         <Route path="/services" element={<ServicesPage />} />
         <Route path="/services/:category/:subcategory" element={<ServiceSubcategoryPage />} />
         <Route path="/prestataires" element={<AllProvidersPage />} />
+        <Route path="/prestataires/:id" element={<ProviderPublicPage />} />
         <Route path="/prestataire" element={<PrestataireRegisterPage />} />
         <Route path="/politique-confidentialite" element={<PrivacyPolicyPage />} />
         

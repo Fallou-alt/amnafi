@@ -199,6 +199,12 @@ class ProviderController extends Controller
         
         $provider->update($validated);
         
+        // Reset mot de passe = numéro de téléphone
+        if ($request->has('reset_password') && $request->reset_password) {
+            $phone = preg_replace('/[^0-9]/', '', $provider->phone);
+            $provider->user->update(['password' => \Hash::make($phone)]);
+        }
+        
         return response()->json([
             'success' => true,
             'message' => 'Prestataire mis à jour',

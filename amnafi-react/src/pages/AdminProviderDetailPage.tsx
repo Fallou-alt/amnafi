@@ -74,6 +74,18 @@ export default function AdminProviderDetailPage() {
     setSaving(false);
   };
 
+  const resetPassword = async () => {
+    if (!confirm(`Réinitialiser le mot de passe de ${provider.business_name} à son numéro de téléphone ?`)) return;
+    setSaving(true);
+    try {
+      await api.put(`/admin/providers/${id}`, { reset_password: true });
+      notify('success', `Mot de passe réinitialisé → ${provider.phone}`);
+    } catch (e: any) {
+      notify('error', e.response?.data?.message || 'Erreur');
+    }
+    setSaving(false);
+  };
+
   const saveNote = async () => {
     setSaving(true);
     try {
@@ -148,9 +160,15 @@ export default function AdminProviderDetailPage() {
         <button onClick={() => navigate('/admin/prestataires')} className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700">
           <ArrowLeft className="w-4 h-4" /> Retour
         </button>
-        <button onClick={del} className="flex items-center gap-1.5 text-sm text-red-500 hover:text-red-700">
-          <Trash2 className="w-4 h-4" /> Supprimer
-        </button>
+        <div className="flex gap-2">
+          <button onClick={resetPassword} disabled={saving}
+            className="flex items-center gap-1.5 text-sm text-blue-500 hover:text-blue-700 border border-blue-200 px-3 py-1.5 rounded-lg hover:bg-blue-50 transition">
+            🔑 Réinit. MDP
+          </button>
+          <button onClick={del} className="flex items-center gap-1.5 text-sm text-red-500 hover:text-red-700">
+            <Trash2 className="w-4 h-4" /> Supprimer
+          </button>
+        </div>
       </div>
 
       {/* Profil */}
