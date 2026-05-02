@@ -47,17 +47,15 @@ export default function ServicesPage() {
               <Link
                 key={cat.id}
                 to={`/prestataires?category_id=${cat.id}`}
-                className="bg-white rounded-xl border border-gray-100 hover:border-blue-300 hover:shadow-sm transition p-4 flex flex-col items-center text-center gap-2 group"
+                className="rounded-xl shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer border-2 p-5 flex flex-col items-center text-center gap-2 bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 hover:from-blue-100 hover:to-blue-200 group"
               >
-                <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center group-hover:bg-blue-100 transition">
-                  <span className="text-2xl">{cat.icon}</span>
-                </div>
-                <p className="text-sm font-medium text-gray-800 group-hover:text-blue-600 transition leading-tight">
+                <span className="text-3xl mb-1">{cat.icon}</span>
+                <p className="text-sm font-semibold text-gray-900 group-hover:text-blue-700 transition leading-tight">
                   {cat.name}
                 </p>
                 {cat.providers_count > 0 && (
-                  <span className="flex items-center gap-1 text-xs text-blue-400 font-medium">
-                    <Users className="w-3 h-3" /> {cat.providers_count} prestataire{cat.providers_count > 1 ? 's' : ''}
+                  <span className="flex items-center gap-1 text-xs text-blue-500 font-medium">
+                    <Users className="w-3 h-3" /> {cat.providers_count}
                   </span>
                 )}
               </Link>
