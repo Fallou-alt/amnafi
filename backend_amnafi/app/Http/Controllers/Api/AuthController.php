@@ -24,10 +24,19 @@ class AuthController extends Controller
         if ($request->has('email') && $request->email) {
             $user = User::where('email', $request->email)->first();
         } elseif ($request->has('phone') && $request->phone) {
-            $user = User::where('phone', $request->phone)->first();
+            $phone = preg_replace('/[^0-9]/', '', $request->phone);
+            $user = User::where('phone', $phone)
+                ->orWhere('phone', '+' . $phone)
+                ->orWhere('phone', $request->phone)
+                ->first();
         }
 
         if (!$user || !Hash::check($request->password, $user->password)) {
+            \Log::warning('Login failed', [
+                'phone' => $request->phone ?? $request->email,
+                'user_found' => $user ? true : false,
+                'password_match' => $user ? Hash::check($request->password, $user->password) : false,
+            ]);
             return response()->json([
                 'success' => false,
                 'message' => 'Identifiants incorrects'
@@ -58,6 +67,20 @@ class AuthController extends Controller
                 'success' => false,
                 'message' => 'Profil prestataire non trouvé. Veuillez d\'abord créer votre profil prestataire.'
             ], 404);
+        }
+
+        if ($provider->is_locked) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Votre compte est temporairement verrouillé. Contactez le support.'
+            ], 403);
+        }
+
+        if (!$provider->is_active) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Votre compte est désactivé. Contactez le support.'
+            ], 403);
         }
 
         return response()->json([
