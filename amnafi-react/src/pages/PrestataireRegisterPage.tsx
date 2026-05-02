@@ -165,6 +165,23 @@ export default function InscriptionPrestataire() {
       </nav>
 
       <div className="max-w-3xl mx-auto px-4 py-8">
+        {/* Bannière marketing */}
+        <div className="bg-gradient-to-r from-orange-600 to-orange-500 rounded-2xl p-5 mb-6 text-white">
+          <div className="flex items-start gap-3">
+            <span className="text-3xl">🏦</span>
+            <div>
+              <h2 className="font-bold text-lg leading-tight">Opportunité unique au Sénégal</h2>
+              <p className="text-orange-100 text-sm mt-1">
+                Nos partenaires <strong className="text-white">banques et assurances</strong> recrutent activement des <strong className="text-white">commerciaux terrain</strong> et <strong className="text-white">conseillers clientèle</strong>. Créez votre profil gratuitement et soyez visible auprès des meilleurs employeurs du secteur financier.
+              </p>
+              <div className="flex flex-wrap gap-2 mt-3">
+                {['✅ Inscription gratuite', '📞 Contact direct', '🏆 Partenaires certifiés', '📍 Partout au Sénégal'].map(tag => (
+                  <span key={tag} className="bg-white/20 text-white text-xs px-2.5 py-1 rounded-full font-medium">{tag}</span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

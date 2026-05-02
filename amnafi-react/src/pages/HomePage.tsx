@@ -157,6 +157,32 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Bannière partenariat banques/assurances */}
+      <section className="bg-gradient-to-r from-orange-600 to-orange-500 py-10">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="text-white text-center md:text-left">
+              <div className="inline-flex items-center gap-2 bg-white/20 rounded-full px-3 py-1 text-sm font-medium mb-3">
+                🏦 Partenariat Banques & Assurances
+              </div>
+              <h2 className="text-2xl md:text-3xl font-bold mb-2">
+                Vous cherchez un emploi dans la finance ?<br />
+                <span className="text-orange-200">AMNAFI recrute pour vous.</span>
+              </h2>
+              <p className="text-orange-100 text-sm md:text-base max-w-xl">
+                Nos partenaires banques et compagnies d'assurance recrutent des <strong className="text-white">commerciaux terrain</strong> et <strong className="text-white">conseillers clientèle</strong> partout au Sénégal. Inscrivez-vous gratuitement et soyez contacté directement.
+              </p>
+            </div>
+            <div className="shrink-0">
+              <Link to="/prestataire"
+                className="inline-flex items-center gap-2 bg-white text-orange-600 font-bold px-6 py-3.5 rounded-xl hover:bg-orange-50 transition shadow-lg text-sm whitespace-nowrap">
+                🚀 Je m'inscris gratuitement
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Features */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
