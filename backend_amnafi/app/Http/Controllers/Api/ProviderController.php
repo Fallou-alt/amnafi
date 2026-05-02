@@ -51,7 +51,7 @@ class ProviderController extends Controller
             $query->orderBy('is_premium', 'desc')
                   ->orderBy('rating', 'desc');
 
-            return $query->paginate($request->get('per_page', 12));
+            return $query->paginate($request->get('per_page', 50));
         });
 
         $providers->getCollection()->transform(function ($provider) {
