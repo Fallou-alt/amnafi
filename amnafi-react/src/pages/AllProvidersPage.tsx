@@ -6,6 +6,7 @@ import SEO from '../components/SEO';
 
 interface Provider {
   id: number;
+  slug: string;
   business_name: string;
   description: string;
   phone: string;
@@ -122,7 +123,7 @@ export default function AllProviders() {
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {providers.map((provider) => (
-                <Link key={provider.id} to={`/prestataires/${provider.id}`}
+                <Link key={provider.id} to={`/prestataires/${provider.slug || provider.id}`}
                   className="bg-white rounded-xl border border-gray-100 hover:border-orange-200 hover:shadow-md transition-all overflow-hidden block">
                   <div className="h-28 bg-gradient-to-r from-orange-100 to-red-100 overflow-hidden relative">
                     {provider.cover_photo && (
