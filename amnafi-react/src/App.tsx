@@ -19,7 +19,6 @@ import AdminProvidersPage from './pages/AdminProvidersPage';
 import AdminHomePage from './pages/AdminHomePage';
 import AdminProfilePage from './pages/AdminProfilePage';
 import AdminStatisticsPage from './pages/AdminStatisticsPage';
-import AdminModerationPage from './pages/AdminModerationPage';
 import AdminLoginPage from './pages/AdminLoginPage';
 import AdminProviderDetailPage from './pages/AdminProviderDetailPage';
 import AdminGuard from './components/AdminGuard';
@@ -79,7 +78,6 @@ function App() {
         <Route path="/admin/prestataires/:id" element={<AdminGuard><AdminLayout><AdminProviderDetailPage /></AdminLayout></AdminGuard>} />
         <Route path="/admin/profil" element={<AdminGuard><AdminLayout><AdminProfilePage /></AdminLayout></AdminGuard>} />
         <Route path="/admin/statistiques" element={<AdminGuard><AdminLayout><AdminStatisticsPage /></AdminLayout></AdminGuard>} />
-        <Route path="/admin/moderation" element={<AdminGuard><AdminLayout><AdminModerationPage /></AdminLayout></AdminGuard>} />
         
         {/* JOJ Routes */}
         <Route path="/joj/official-providers" element={<JojOfficialProvidersPage />} />

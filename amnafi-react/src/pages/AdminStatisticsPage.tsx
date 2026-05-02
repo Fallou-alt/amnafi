@@ -1,217 +1,138 @@
 import { useState, useEffect } from 'react';
+import { RefreshCw, TrendingUp, Users, Crown, BarChart2 } from 'lucide-react';
 import api from '../lib/api';
 
-interface DailyStats {
-  date: string;
-  registrations: number;
-  premium_upgrades: number;
-}
-
-interface StatsData {
-  daily_stats: DailyStats[];
-  growth_rate: number;
-}
-
 export default function AdminStatisticsPage() {
-  const [stats, setStats] = useState<StatsData | null>(null);
+  const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchStats();
-  }, []);
-
-  const fetchStats = async () => {
+  const load = async () => {
+    setLoading(true);
     try {
-      const response = await api.get('/admin/stats');
-      setStats(response.data.data);
-    } catch (error) {
-      console.error('Erreur:', error);
-    } finally {
-      setLoading(false);
-    }
+      const r = await api.get('/admin/stats');
+      setStats(r.data.data);
+    } catch {}
+    setLoading(false);
   };
 
-  if (loading) {
-    return (
-      <div className="space-y-6">
-        <h1 className="text-3xl font-bold text-gray-900">Statistiques</h1>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="bg-white p-6 rounded-lg shadow animate-pulse">
-              <div className="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
-              <div className="h-64 bg-gray-200 rounded"></div>
-            </div>
-          ))}
-        </div>
+  useEffect(() => { load(); }, []);
+
+  const daily = stats?.daily_stats || [];
+  const last14 = daily.slice(-14);
+  const totalReg = daily.reduce((s: number, d: any) => s + d.registrations, 0);
+  const totalPrem = daily.reduce((s: number, d: any) => s + d.premium_upgrades, 0);
+  const thisWeek = daily.slice(-7).reduce((s: number, d: any) => s + d.registrations, 0);
+  const lastWeek = daily.slice(-14, -7).reduce((s: number, d: any) => s + d.registrations, 0);
+  const maxReg = Math.max(...last14.map((d: any) => d.registrations), 1);
+  const maxPrem = Math.max(...last14.map((d: any) => d.premium_upgrades), 1);
+
+  const kpis = [
+    { label: 'Inscriptions 30j', value: totalReg, icon: Users, color: 'text-blue-600', bg: 'bg-blue-50' },
+    { label: 'Premium 30j', value: totalPrem, icon: Crown, color: 'text-yellow-600', bg: 'bg-yellow-50' },
+    { label: 'Cette semaine', value: thisWeek, icon: TrendingUp, color: 'text-green-600', bg: 'bg-green-50' },
+    { label: 'Croissance', value: `${stats?.growth_rate || 0}%`, icon: BarChart2, color: 'text-purple-600', bg: 'bg-purple-50' },
+  ];
+
+  const Bar = ({ value, max, color }: { value: number; max: number; color: string }) => (
+    <div className="flex flex-col items-center gap-1 flex-1">
+      <div className="w-full flex items-end justify-center" style={{ height: 80 }}>
+        <div
+          className={`w-full rounded-t ${color} transition-all`}
+          style={{ height: `${Math.max((value / max) * 80, value > 0 ? 4 : 0)}px` }}
+        />
       </div>
-    );
-  }
-
-  const totalRegistrations = stats?.daily_stats.reduce((sum, day) => sum + day.registrations, 0) || 0;
-  const totalPremiumUpgrades = stats?.daily_stats.reduce((sum, day) => sum + day.premium_upgrades, 0) || 0;
-  const avgDailyRegistrations = Math.round(totalRegistrations / 30);
-
-  const maxRegistrations = Math.max(...(stats?.daily_stats.map(d => d.registrations) || [1]));
-  const maxPremium = Math.max(...(stats?.daily_stats.map(d => d.premium_upgrades) || [1]));
+    </div>
+  );
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-5 max-w-4xl">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-gray-900">Statistiques</h1>
-        <button
-          onClick={fetchStats}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          🔄 Actualiser
+        <h1 className="text-xl font-bold text-gray-900">Statistiques</h1>
+        <button onClick={load} className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700">
+          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} /> Actualiser
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <div className="flex items-center justify-between">
+      {/* KPIs */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {loading
+          ? [...Array(4)].map((_, i) => <div key={i} className="bg-white rounded-xl border h-20 animate-pulse" />)
+          : kpis.map(({ label, value, icon: Icon, color, bg }) => (
+            <div key={label} className="bg-white rounded-xl border p-4">
+              <div className={`w-8 h-8 ${bg} rounded-lg flex items-center justify-center mb-2`}>
+                <Icon className={`w-4 h-4 ${color}`} />
+              </div>
+              <p className="text-2xl font-bold text-gray-900">{value}</p>
+              <p className="text-xs text-gray-500 mt-0.5">{label}</p>
+            </div>
+          ))
+        }
+      </div>
+
+      {!loading && last14.length > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Inscriptions */}
+          <div className="bg-white rounded-xl border p-5">
+            <h2 className="text-sm font-semibold text-gray-700 mb-4">Inscriptions — 14 derniers jours</h2>
+            <div className="flex items-end gap-1">
+              {last14.map((d: any, i: number) => (
+                <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                  <span className="text-xs text-gray-400">{d.registrations > 0 ? d.registrations : ''}</span>
+                  <Bar value={d.registrations} max={maxReg} color="bg-blue-400" />
+                  <span className="text-xs text-gray-300 rotate-45 origin-left whitespace-nowrap">
+                    {new Date(d.date).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Premium */}
+          <div className="bg-white rounded-xl border p-5">
+            <h2 className="text-sm font-semibold text-gray-700 mb-4">Passages Premium — 14 derniers jours</h2>
+            <div className="flex items-end gap-1">
+              {last14.map((d: any, i: number) => (
+                <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                  <span className="text-xs text-gray-400">{d.premium_upgrades > 0 ? d.premium_upgrades : ''}</span>
+                  <Bar value={d.premium_upgrades} max={maxPrem} color="bg-yellow-400" />
+                  <span className="text-xs text-gray-300 rotate-45 origin-left whitespace-nowrap">
+                    {new Date(d.date).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Résumé */}
+      {!loading && (
+        <div className="bg-white rounded-xl border p-5">
+          <h2 className="text-sm font-semibold text-gray-700 mb-3">Résumé</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
             <div>
-              <p className="text-sm font-medium text-gray-600">Croissance</p>
-              <p className={`text-2xl font-bold ${
-                (stats?.growth_rate || 0) >= 0 ? 'text-green-600' : 'text-red-600'
-              }`}>
-                {stats?.growth_rate || 0}%
+              <p className="text-xs text-gray-400">Cette semaine</p>
+              <p className="font-bold text-gray-900 text-lg">{thisWeek}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-400">Semaine précédente</p>
+              <p className="font-bold text-gray-900 text-lg">{lastWeek}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-400">Taux conversion premium</p>
+              <p className="font-bold text-gray-900 text-lg">
+                {totalReg > 0 ? `${Math.round((totalPrem / totalReg) * 100)}%` : '0%'}
               </p>
             </div>
-            <span className="text-3xl">📈</span>
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Total 30j</p>
-              <p className="text-2xl font-bold text-gray-900">{totalRegistrations}</p>
-            </div>
-            <span className="text-3xl">👥</span>
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Premium 30j</p>
-              <p className="text-2xl font-bold text-yellow-600">{totalPremiumUpgrades}</p>
-            </div>
-            <span className="text-3xl">⭐</span>
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Moy/jour</p>
-              <p className="text-2xl font-bold text-blue-600">{avgDailyRegistrations}</p>
-            </div>
-            <span className="text-3xl">📊</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">
-            Inscriptions (30 derniers jours)
-          </h2>
-          <div className="h-64 flex items-end justify-between space-x-1">
-            {stats?.daily_stats.slice(-14).map((day, index) => (
-              <div key={index} className="flex flex-col items-center flex-1">
-                <div
-                  className="bg-blue-500 rounded-t w-full min-h-[4px] transition-all hover:bg-blue-600"
-                  style={{
-                    height: `${Math.max((day.registrations / maxRegistrations) * 200, 4)}px`
-                  }}
-                  title={`${day.registrations} inscriptions le ${new Date(day.date).toLocaleDateString('fr-FR')}`}
-                ></div>
-                <span className="text-xs text-gray-500 mt-2 transform rotate-45 origin-left">
-                  {new Date(day.date).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">
-            Passages Premium (30 derniers jours)
-          </h2>
-          <div className="h-64 flex items-end justify-between space-x-1">
-            {stats?.daily_stats.slice(-14).map((day, index) => (
-              <div key={index} className="flex flex-col items-center flex-1">
-                <div
-                  className="bg-yellow-500 rounded-t w-full min-h-[4px] transition-all hover:bg-yellow-600"
-                  style={{
-                    height: `${Math.max((day.premium_upgrades / Math.max(maxPremium, 1)) * 200, 4)}px`
-                  }}
-                  title={`${day.premium_upgrades} passages premium le ${new Date(day.date).toLocaleDateString('fr-FR')}`}
-                ></div>
-                <span className="text-xs text-gray-500 mt-2 transform rotate-45 origin-left">
-                  {new Date(day.date).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Résumé Hebdomadaire</h2>
-          <div className="space-y-4">
-            <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
-              <span className="text-sm font-medium text-gray-700">Cette semaine</span>
-              <span className="text-lg font-bold text-blue-600">
-                {stats?.daily_stats.slice(-7).reduce((sum, day) => sum + day.registrations, 0) || 0}
-              </span>
-            </div>
-            <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-              <span className="text-sm font-medium text-gray-700">Semaine précédente</span>
-              <span className="text-lg font-bold text-gray-600">
-                {stats?.daily_stats.slice(-14, -7).reduce((sum, day) => sum + day.registrations, 0) || 0}
-              </span>
-            </div>
-            <div className="flex justify-between items-center p-3 bg-yellow-50 rounded-lg">
-              <span className="text-sm font-medium text-gray-700">Premium cette semaine</span>
-              <span className="text-lg font-bold text-yellow-600">
-                {stats?.daily_stats.slice(-7).reduce((sum, day) => sum + day.premium_upgrades, 0) || 0}
-              </span>
+              <p className="text-xs text-gray-400">Meilleur jour</p>
+              <p className="font-bold text-gray-900 text-lg">
+                {daily.reduce((best: any, d: any) => d.registrations > (best?.registrations || 0) ? d : best, null)?.registrations || 0}
+              </p>
             </div>
           </div>
         </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Indicateurs</h2>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">Taux de conversion Premium</span>
-              <span className="font-semibold text-gray-900">
-                {totalRegistrations > 0 
-                  ? `${Math.round((totalPremiumUpgrades / totalRegistrations) * 100)}%`
-                  : '0%'
-                }
-              </span>
-            </div>
-            
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">Meilleur jour</span>
-              <span className="font-semibold text-gray-900">
-                {stats?.daily_stats.reduce((best, day) => 
-                  day.registrations > best.registrations ? day : best
-                )?.registrations || 0} inscriptions
-              </span>
-            </div>
-            
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">Revenus estimés (30j)</span>
-              <span className="font-semibold text-green-600">
-                {(totalPremiumUpgrades * 29.99).toFixed(2)}€
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
+      )}
     </div>
   );
 }

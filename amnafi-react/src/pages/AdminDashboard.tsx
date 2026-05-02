@@ -1,179 +1,77 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { Users, Crown, UserCheck, UserX, TrendingUp, RefreshCw } from 'lucide-react';
 import api from '../lib/api';
 
-interface DashboardStats {
-  total_providers: number;
-  active_providers: number;
-  inactive_providers: number;
-  premium_providers: number;
-  today_registrations: number;
-  estimated_revenue: number;
-}
-
 export default function AdminDashboard() {
-  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchDashboardData();
-  }, []);
-
-  const fetchDashboardData = async () => {
+  const load = async () => {
+    setLoading(true);
     try {
-      const response = await api.get('/admin/dashboard');
-      setStats(response.data.data);
-    } catch (error) {
-      console.error('Erreur:', error);
-    } finally {
-      setLoading(false);
-    }
+      const r = await api.get('/admin/dashboard');
+      setStats(r.data.data);
+    } catch {}
+    setLoading(false);
   };
 
-  if (loading) {
-    return (
-      <div className="space-y-6">
-        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[...Array(6)].map((_, i) => (
-            <div key={i} className="bg-white p-6 rounded-lg shadow animate-pulse">
-              <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
-              <div className="h-8 bg-gray-200 rounded w-1/2"></div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
+  useEffect(() => { load(); }, []);
 
-  const cards = [
-    {
-      title: 'Total Prestataires',
-      value: stats?.total_providers || 0,
-      icon: '👥',
-      color: 'bg-blue-500'
-    },
-    {
-      title: 'Prestataires Actifs',
-      value: stats?.active_providers || 0,
-      icon: '✅',
-      color: 'bg-green-500'
-    },
-    {
-      title: 'Prestataires Inactifs',
-      value: stats?.inactive_providers || 0,
-      icon: '❌',
-      color: 'bg-red-500'
-    },
-    {
-      title: 'Comptes Premium',
-      value: stats?.premium_providers || 0,
-      icon: '⭐',
-      color: 'bg-yellow-500'
-    },
-    {
-      title: 'Inscriptions Aujourd\'hui',
-      value: stats?.today_registrations || 0,
-      icon: '📅',
-      color: 'bg-purple-500'
-    },
-    {
-      title: 'Revenus Estimés',
-      value: `${stats?.estimated_revenue?.toFixed(2) || 0}€`,
-      icon: '💰',
-      color: 'bg-emerald-500'
-    }
+  const cards = stats ? [
+    { label: 'Total prestataires', value: stats.total_providers, icon: Users, color: 'text-blue-600', bg: 'bg-blue-50' },
+    { label: 'Actifs', value: stats.active_providers, icon: UserCheck, color: 'text-green-600', bg: 'bg-green-50' },
+    { label: 'Inactifs', value: stats.inactive_providers, icon: UserX, color: 'text-red-500', bg: 'bg-red-50' },
+    { label: 'Premium', value: stats.premium_providers, icon: Crown, color: 'text-yellow-600', bg: 'bg-yellow-50' },
+    { label: "Aujourd'hui", value: stats.today_registrations, icon: TrendingUp, color: 'text-purple-600', bg: 'bg-purple-50' },
+  ] : [];
+
+  const quickLinks = [
+    { to: '/admin/prestataires', label: 'Gérer les prestataires', sub: 'Activer, modifier, supprimer' },
+    { to: '/admin/statistiques', label: 'Statistiques', sub: 'Inscriptions et croissance' },
+    { to: '/joj/admin/providers', label: 'Prestataires officiels', sub: 'Gérer les profils JOJ' },
+    { to: '/joj/admin/missions', label: 'Missions', sub: 'Valider et assigner' },
   ];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 max-w-5xl">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-        <button
-          onClick={fetchDashboardData}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          🔄 Actualiser
+        <h1 className="text-xl font-bold text-gray-900">Dashboard</h1>
+        <button onClick={load} className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700">
+          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} /> Actualiser
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {cards.map((card, index) => (
-          <div key={index} className="bg-white rounded-lg shadow-md overflow-hidden">
-            <div className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600 mb-1">
-                    {card.title}
-                  </p>
-                  <p className="text-3xl font-bold text-gray-900">
-                    {card.value}
-                  </p>
-                </div>
-                <div className={`p-3 rounded-full ${card.color} text-white text-2xl`}>
-                  {card.icon}
-                </div>
+      {/* Stats */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+        {loading
+          ? [...Array(5)].map((_, i) => <div key={i} className="bg-white rounded-xl border h-20 animate-pulse" />)
+          : cards.map(({ label, value, icon: Icon, color, bg }) => (
+            <div key={label} className="bg-white rounded-xl border p-4">
+              <div className={`w-8 h-8 ${bg} rounded-lg flex items-center justify-center mb-2`}>
+                <Icon className={`w-4 h-4 ${color}`} />
               </div>
+              <p className="text-2xl font-bold text-gray-900">{value ?? '—'}</p>
+              <p className="text-xs text-gray-500 mt-0.5">{label}</p>
             </div>
-            <div className={`h-2 ${card.color}`}></div>
-          </div>
-        ))}
+          ))
+        }
       </div>
 
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Actions Rapides</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Link
-            to="/admin/prestataires"
-            className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-          >
-            <span className="text-2xl mr-3">👥</span>
-            <div>
-              <p className="font-medium text-gray-900">Gérer les Prestataires</p>
-              <p className="text-sm text-gray-600">Activer, désactiver, modifier</p>
-            </div>
-          </Link>
-          
-          <Link
-            to="/joj/admin/providers"
-            className="flex items-center p-4 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors bg-gradient-to-r from-blue-50 to-purple-50"
-          >
-            <span className="text-2xl mr-3">🏅</span>
-            <div>
-              <p className="font-medium text-blue-900">Prestataires JOJ 2026</p>
-              <p className="text-sm text-blue-600">Gérer les prestataires officiels</p>
-            </div>
-          </Link>
-          
-          <Link
-            to="/joj/admin/missions"
-            className="flex items-center p-4 border border-purple-200 rounded-lg hover:bg-purple-50 transition-colors bg-gradient-to-r from-purple-50 to-pink-50"
-          >
-            <span className="text-2xl mr-3">📋</span>
-            <div>
-              <p className="font-medium text-purple-900">Missions JOJ</p>
-              <p className="text-sm text-purple-600">Valider et assigner les missions</p>
-            </div>
-          </Link>
-          
-          <Link
-            to="/admin/statistiques"
-            className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-          >
-            <span className="text-2xl mr-3">📈</span>
-            <div>
-              <p className="font-medium text-gray-900">Voir les Statistiques</p>
-              <p className="text-sm text-gray-600">Graphiques et analyses</p>
-            </div>
-          </Link>
-          
-          <div className="flex items-center p-4 border border-gray-200 rounded-lg bg-gray-50">
-            <span className="text-2xl mr-3">⚙️</span>
-            <div>
-              <p className="font-medium text-gray-500">Paramètres</p>
-              <p className="text-sm text-gray-400">Bientôt disponible</p>
-            </div>
-          </div>
+      {/* Accès rapides */}
+      <div>
+        <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Accès rapides</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {quickLinks.map(({ to, label, sub }) => (
+            <Link
+              key={to}
+              to={to}
+              className="bg-white rounded-xl border p-4 hover:border-orange-300 hover:shadow-sm transition group"
+            >
+              <p className="font-medium text-gray-900 group-hover:text-orange-600 transition text-sm">{label}</p>
+              <p className="text-xs text-gray-400 mt-0.5">{sub}</p>
+            </Link>
+          ))}
         </div>
       </div>
     </div>

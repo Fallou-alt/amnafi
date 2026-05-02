@@ -1,246 +1,338 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import {
+  ArrowLeft, ToggleLeft, ToggleRight, Crown, EyeOff, Eye,
+  Lock, Unlock, Trash2, Save, Phone, MapPin, Calendar, User
+} from 'lucide-react';
 import api from '../lib/api';
 
-interface Provider {
-  id: number;
-  business_name: string;
-  phone: string;
-  description?: string;
-  address?: string;
-  city?: string;
-  is_active: boolean;
-  is_premium: boolean;
-  is_hidden: boolean;
-  is_locked: boolean;
-  locked_until?: string;
-  status_reason?: string;
-  admin_notes?: string;
-  profile_photo?: string;
-  created_at: string;
-  user: { name: string; email: string; phone?: string };
-  category: { name: string };
-}
+type Toast = { type: 'success' | 'error'; text: string };
 
 export default function AdminProviderDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [provider, setProvider] = useState<Provider | null>(null);
+  const [provider, setProvider] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [note, setNote] = useState('');
   const [saving, setSaving] = useState(false);
-  const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [toast, setToast] = useState<Toast | null>(null);
+  const [note, setNote] = useState('');
+  const [editForm, setEditForm] = useState<any>({});
+  const [editMode, setEditMode] = useState(false);
+  const [lockForm, setLockForm] = useState({ duration: 7, reason: '' });
+  const [showLock, setShowLock] = useState(false);
 
-  useEffect(() => { fetchProvider(); }, [id]);
+  const notify = (type: Toast['type'], text: string) => {
+    setToast({ type, text });
+    setTimeout(() => setToast(null), 3500);
+  };
 
-  const fetchProvider = async () => {
+  const load = async () => {
     try {
-      const res = await api.get(`/admin/providers/${id}`);
-      setProvider(res.data.data);
-      setNote(res.data.data.admin_notes || '');
-    } catch {
-      navigate('/admin/prestataires');
-    } finally {
-      setLoading(false);
-    }
+      const r = await api.get(`/admin/providers/${id}`);
+      const d = r.data.data;
+      setProvider(d);
+      setNote(d.admin_notes || '');
+      setEditForm({
+        business_name: d.business_name || '',
+        phone: d.phone || '',
+        city: d.city || '',
+        address: d.address || '',
+        description: d.description || '',
+      });
+    } catch { navigate('/admin/prestataires'); }
+    setLoading(false);
   };
 
-  const showNotif = (type: 'success' | 'error', message: string) => {
-    setNotification({ type, message });
-    setTimeout(() => setNotification(null), 3000);
-  };
+  useEffect(() => { load(); }, [id]);
 
-  const doAction = async (action: string, body?: any) => {
+  const doAction = async (endpoint: string, body?: any) => {
     setSaving(true);
     try {
-      await api.patch(`/admin/providers/${id}/${action}`, body);
-      showNotif('success', 'Action effectuée avec succès');
-      fetchProvider();
+      await api.patch(`/admin/providers/${id}/${endpoint}`, body);
+      notify('success', 'Modification effectuée');
+      load();
     } catch (e: any) {
-      showNotif('error', e.response?.data?.message || 'Erreur');
-    } finally {
-      setSaving(false);
+      notify('error', e.response?.data?.message || 'Erreur');
     }
+    setSaving(false);
+  };
+
+  const saveEdit = async () => {
+    setSaving(true);
+    try {
+      await api.put(`/admin/providers/${id}`, editForm);
+      notify('success', 'Profil mis à jour');
+      setEditMode(false);
+      load();
+    } catch (e: any) {
+      notify('error', e.response?.data?.message || 'Erreur');
+    }
+    setSaving(false);
   };
 
   const saveNote = async () => {
     setSaving(true);
     try {
       await api.post(`/admin/providers/${id}/note`, { note });
-      showNotif('success', 'Note enregistrée');
-      fetchProvider();
-    } catch {
-      showNotif('error', 'Erreur lors de la sauvegarde');
-    } finally {
-      setSaving(false);
-    }
+      notify('success', 'Note enregistrée');
+    } catch { notify('error', 'Erreur'); }
+    setSaving(false);
   };
 
-  const deleteProvider = async () => {
+  const del = async () => {
     if (!confirm('Supprimer définitivement ce prestataire ?')) return;
     try {
       await api.delete(`/admin/providers/${id}`);
       navigate('/admin/prestataires');
-    } catch {
-      showNotif('error', 'Erreur lors de la suppression');
-    }
+    } catch { notify('error', 'Erreur lors de la suppression'); }
   };
 
   if (loading) return (
     <div className="flex items-center justify-center h-64">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" />
+      <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
     </div>
   );
 
   if (!provider) return null;
 
-  return (
-    <div className="space-y-6 max-w-4xl">
-      <div className="flex items-center justify-between">
-        <button onClick={() => navigate('/admin/prestataires')} className="text-blue-600 hover:underline text-sm">
-          ← Retour aux prestataires
-        </button>
-        <button onClick={deleteProvider} className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700">
-          🗑️ Supprimer
-        </button>
-      </div>
+  const statusBtns = [
+    {
+      label: provider.is_active ? 'Actif' : 'Inactif',
+      action: () => doAction('toggle-status'),
+      icon: provider.is_active ? ToggleRight : ToggleLeft,
+      color: provider.is_active ? 'text-green-600 bg-green-50 border-green-200' : 'text-red-500 bg-red-50 border-red-200',
+    },
+    {
+      label: provider.is_premium ? 'Premium' : 'Gratuit',
+      action: () => doAction('toggle-premium'),
+      icon: Crown,
+      color: provider.is_premium ? 'text-yellow-600 bg-yellow-50 border-yellow-200' : 'text-gray-500 bg-gray-50 border-gray-200',
+    },
+    {
+      label: provider.is_hidden ? 'Masqué' : 'Visible',
+      action: () => doAction('hide'),
+      icon: provider.is_hidden ? EyeOff : Eye,
+      color: provider.is_hidden ? 'text-yellow-600 bg-yellow-50 border-yellow-200' : 'text-blue-600 bg-blue-50 border-blue-200',
+    },
+    {
+      label: provider.is_locked ? 'Verrouillé' : 'Libre',
+      action: () => provider.is_locked ? doAction('unlock') : setShowLock(true),
+      icon: provider.is_locked ? Lock : Unlock,
+      color: provider.is_locked ? 'text-red-600 bg-red-50 border-red-200' : 'text-gray-500 bg-gray-50 border-gray-200',
+    },
+  ];
 
-      {notification && (
-        <div className={`p-4 rounded-lg ${notification.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}>
-          {notification.message}
+  return (
+    <div className="max-w-3xl space-y-4">
+      {/* Toast */}
+      {toast && (
+        <div className={`fixed top-4 right-4 z-50 px-4 py-2.5 rounded-lg text-sm font-medium shadow-lg ${
+          toast.type === 'success' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'
+        }`}>
+          {toast.text}
         </div>
       )}
 
-      {/* Infos principales */}
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <div className="flex items-start space-x-4">
-          {provider.profile_photo ? (
-            <img
-              src={`https://amnafi.net/backend/public/storage/${provider.profile_photo}`}
-              alt={provider.business_name}
-              className="w-20 h-20 rounded-full object-cover"
-              onError={(e) => { (e.target as HTMLImageElement).src = ''; }}
-            />
-          ) : (
-            <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center text-2xl font-bold text-blue-600">
-              {provider.business_name.charAt(0)}
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <button onClick={() => navigate('/admin/prestataires')} className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700">
+          <ArrowLeft className="w-4 h-4" /> Retour
+        </button>
+        <button onClick={del} className="flex items-center gap-1.5 text-sm text-red-500 hover:text-red-700">
+          <Trash2 className="w-4 h-4" /> Supprimer
+        </button>
+      </div>
+
+      {/* Profil */}
+      <div className="bg-white rounded-xl border p-5">
+        <div className="flex items-start gap-4">
+          <div className="w-16 h-16 rounded-xl bg-orange-50 overflow-hidden shrink-0 flex items-center justify-center">
+            {provider.profile_photo ? (
+              <img
+                src={`https://amnafi.net/backend/public/storage/${provider.profile_photo}`}
+                className="w-full h-full object-cover"
+                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+              />
+            ) : (
+              <span className="text-orange-600 font-bold text-2xl">{provider.business_name?.charAt(0)}</span>
+            )}
+          </div>
+          <div className="flex-1 min-w-0">
+            <h1 className="text-lg font-bold text-gray-900">{provider.business_name}</h1>
+            <p className="text-sm text-gray-500">{provider.category?.name}</p>
+            <div className="flex flex-wrap gap-3 mt-2 text-xs text-gray-500">
+              <span className="flex items-center gap-1"><Phone className="w-3.5 h-3.5" />{provider.phone}</span>
+              {provider.city && <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />{provider.city}</span>}
+              <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" />Inscrit le {new Date(provider.created_at).toLocaleDateString('fr-FR')}</span>
+            </div>
+          </div>
+          <button
+            onClick={() => setEditMode(!editMode)}
+            className="text-xs px-3 py-1.5 border border-gray-200 rounded-lg hover:border-orange-400 hover:text-orange-600 transition"
+          >
+            {editMode ? 'Annuler' : 'Modifier'}
+          </button>
+        </div>
+
+        {/* Compte utilisateur */}
+        <div className="mt-4 pt-4 border-t grid grid-cols-2 gap-3 text-sm">
+          <div>
+            <p className="text-xs text-gray-400">Nom complet</p>
+            <p className="font-medium text-gray-800 flex items-center gap-1"><User className="w-3.5 h-3.5 text-gray-400" />{provider.user?.name}</p>
+          </div>
+          <div>
+            <p className="text-xs text-gray-400">Email</p>
+            <p className="font-medium text-gray-800 truncate">{provider.user?.email}</p>
+          </div>
+          <div>
+            <p className="text-xs text-gray-400">Téléphone utilisateur</p>
+            <p className="font-medium text-gray-800">{provider.user?.phone || provider.phone}</p>
+          </div>
+          {provider.subscription_expires_at && (
+            <div>
+              <p className="text-xs text-gray-400">Abonnement expire</p>
+              <p className="font-medium text-gray-800">{new Date(provider.subscription_expires_at).toLocaleDateString('fr-FR')}</p>
             </div>
           )}
-          <div className="flex-1">
-            <h1 className="text-2xl font-bold text-gray-900">{provider.business_name}</h1>
-            <p className="text-gray-500">{provider.category?.name}</p>
-            <p className="text-gray-600 mt-1">📞 {provider.phone}</p>
-            {provider.address && <p className="text-gray-600">📍 {provider.address}, {provider.city}</p>}
-            <p className="text-gray-500 text-sm mt-1">Inscrit le {new Date(provider.created_at).toLocaleDateString('fr-FR')}</p>
+        </div>
+      </div>
+
+      {/* Édition */}
+      {editMode && (
+        <div className="bg-white rounded-xl border p-5 space-y-3">
+          <h2 className="font-semibold text-gray-900 text-sm">Modifier les informations</h2>
+          <div className="grid grid-cols-2 gap-3">
+            {[
+              { name: 'business_name', label: 'Nom / Entreprise' },
+              { name: 'phone', label: 'Téléphone' },
+              { name: 'city', label: 'Ville' },
+              { name: 'address', label: 'Adresse' },
+            ].map(({ name, label }) => (
+              <div key={name}>
+                <label className="block text-xs text-gray-500 mb-1">{label}</label>
+                <input
+                  type="text"
+                  value={editForm[name]}
+                  onChange={(e) => setEditForm({ ...editForm, [name]: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                />
+              </div>
+            ))}
           </div>
+          <div>
+            <label className="block text-xs text-gray-500 mb-1">Description</label>
+            <textarea
+              value={editForm.description}
+              onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+              rows={3}
+              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none"
+            />
+          </div>
+          <button
+            onClick={saveEdit}
+            disabled={saving}
+            className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg text-sm hover:bg-orange-700 disabled:opacity-50"
+          >
+            <Save className="w-4 h-4" /> Enregistrer
+          </button>
         </div>
-
-        {provider.description && (
-          <p className="mt-4 text-gray-700 bg-gray-50 p-3 rounded-lg">{provider.description}</p>
-        )}
-      </div>
-
-      {/* Compte utilisateur */}
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-lg font-semibold mb-3">Compte utilisateur</h2>
-        <div className="grid grid-cols-2 gap-4 text-sm">
-          <div><span className="text-gray-500">Nom :</span> <span className="font-medium">{provider.user?.name}</span></div>
-          <div><span className="text-gray-500">Email :</span> <span className="font-medium">{provider.user?.email}</span></div>
-          <div><span className="text-gray-500">Téléphone :</span> <span className="font-medium">{provider.user?.phone || provider.phone}</span></div>
-        </div>
-      </div>
+      )}
 
       {/* Statuts & Actions */}
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-lg font-semibold mb-4">Statuts & Actions</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="text-center p-4 border rounded-lg">
-            <p className="text-sm text-gray-500 mb-2">Compte</p>
-            <span className={`px-3 py-1 rounded-full text-xs font-medium ${provider.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-              {provider.is_active ? '✅ Actif' : '❌ Inactif'}
-            </span>
+      <div className="bg-white rounded-xl border p-5">
+        <h2 className="font-semibold text-gray-900 text-sm mb-3">Statuts & Actions</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          {statusBtns.map(({ label, action, icon: Icon, color }) => (
             <button
-              onClick={() => doAction('toggle-status')}
+              key={label}
+              onClick={action}
               disabled={saving}
-              className="mt-2 w-full text-xs px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded"
+              className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border text-xs font-medium transition hover:opacity-80 disabled:opacity-50 ${color}`}
             >
-              Basculer
+              <Icon className="w-5 h-5" />
+              {label}
             </button>
-          </div>
-
-          <div className="text-center p-4 border rounded-lg">
-            <p className="text-sm text-gray-500 mb-2">Type</p>
-            <span className={`px-3 py-1 rounded-full text-xs font-medium ${provider.is_premium ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'}`}>
-              {provider.is_premium ? '⭐ Premium' : '🆓 Gratuit'}
-            </span>
-            <button
-              onClick={() => doAction('toggle-premium')}
-              disabled={saving}
-              className="mt-2 w-full text-xs px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded"
-            >
-              Basculer
-            </button>
-          </div>
-
-          <div className="text-center p-4 border rounded-lg">
-            <p className="text-sm text-gray-500 mb-2">Visibilité</p>
-            <span className={`px-3 py-1 rounded-full text-xs font-medium ${provider.is_hidden ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}`}>
-              {provider.is_hidden ? '🙈 Masqué' : '👁️ Visible'}
-            </span>
-            <button
-              onClick={() => doAction('hide')}
-              disabled={saving}
-              className="mt-2 w-full text-xs px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded"
-            >
-              Basculer
-            </button>
-          </div>
-
-          <div className="text-center p-4 border rounded-lg">
-            <p className="text-sm text-gray-500 mb-2">Accès</p>
-            <span className={`px-3 py-1 rounded-full text-xs font-medium ${provider.is_locked ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
-              {provider.is_locked ? '🔒 Verrouillé' : '🔓 Libre'}
-            </span>
-            <button
-              onClick={() => provider.is_locked ? doAction('unlock') : doAction('lock', { duration: 7, reason: 'Verrouillage admin' })}
-              disabled={saving}
-              className="mt-2 w-full text-xs px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded"
-            >
-              {provider.is_locked ? 'Déverrouiller' : 'Verrouiller'}
-            </button>
-          </div>
+          ))}
         </div>
-
-        {provider.status_reason && (
-          <p className="mt-4 text-sm text-gray-600 bg-yellow-50 p-3 rounded-lg">
-            <strong>Raison :</strong> {provider.status_reason}
+        {provider.locked_until && (
+          <p className="text-xs text-red-500 mt-2">
+            Verrouillé jusqu'au {new Date(provider.locked_until).toLocaleDateString('fr-FR')}
           </p>
         )}
-        {provider.locked_until && (
-          <p className="mt-2 text-sm text-red-600">
-            Verrouillé jusqu'au : {new Date(provider.locked_until).toLocaleDateString('fr-FR')}
-          </p>
+        {provider.status_reason && (
+          <p className="text-xs text-gray-500 mt-1">Raison : {provider.status_reason}</p>
         )}
       </div>
 
+      {/* Description */}
+      {provider.description && !editMode && (
+        <div className="bg-white rounded-xl border p-5">
+          <h2 className="font-semibold text-gray-900 text-sm mb-2">Description</h2>
+          <p className="text-sm text-gray-600">{provider.description}</p>
+        </div>
+      )}
+
       {/* Notes admin */}
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-lg font-semibold mb-3">Notes administrateur</h2>
+      <div className="bg-white rounded-xl border p-5">
+        <h2 className="font-semibold text-gray-900 text-sm mb-3">Notes internes</h2>
         <textarea
           value={note}
           onChange={(e) => setNote(e.target.value)}
-          rows={4}
-          placeholder="Ajouter une note interne sur ce prestataire..."
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
+          rows={3}
+          placeholder="Notes visibles uniquement par les admins..."
+          className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none"
         />
         <button
           onClick={saveNote}
           disabled={saving}
-          className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50"
+          className="mt-2 flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded-lg text-sm hover:bg-gray-900 disabled:opacity-50"
         >
-          💾 Enregistrer la note
+          <Save className="w-4 h-4" /> Enregistrer la note
         </button>
       </div>
+
+      {/* Modal verrouillage */}
+      {showLock && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
+            <h3 className="font-semibold text-gray-900 mb-4">Verrouiller ce prestataire</h3>
+            <div className="space-y-3 mb-4">
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Durée</label>
+                <select
+                  value={lockForm.duration}
+                  onChange={(e) => setLockForm({ ...lockForm, duration: +e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
+                >
+                  <option value={1}>1 jour</option>
+                  <option value={7}>7 jours</option>
+                  <option value={30}>30 jours</option>
+                  <option value={90}>90 jours</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Raison</label>
+                <textarea
+                  value={lockForm.reason}
+                  onChange={(e) => setLockForm({ ...lockForm, reason: e.target.value })}
+                  rows={2}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm resize-none"
+                  placeholder="Motif..."
+                />
+              </div>
+            </div>
+            <div className="flex gap-2 justify-end">
+              <button onClick={() => setShowLock(false)} className="px-4 py-2 text-sm text-gray-600">Annuler</button>
+              <button
+                onClick={() => { doAction('lock', lockForm); setShowLock(false); }}
+                className="px-4 py-2 text-sm text-white bg-red-600 hover:bg-red-700 rounded-lg"
+              >
+                Verrouiller
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

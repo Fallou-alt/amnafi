@@ -1,211 +1,125 @@
 import { useState, useEffect } from 'react';
+import { Save, Shield } from 'lucide-react';
 import api from '../lib/api';
 
-interface AdminProfile {
-  id: number;
-  name: string;
-  email: string;
-  phone: string;
-}
-
 export default function AdminProfilePage() {
-  const [, setProfile] = useState<AdminProfile | null>(null);
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    current_password: '',
-    new_password: '',
-    new_password_confirmation: ''
-  });
+  const [form, setForm] = useState({ name: '', email: '', phone: '', current_password: '', new_password: '', new_password_confirmation: '' });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [showPasswordFields, setShowPasswordFields] = useState(false);
+  const [msg, setMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [showPwd, setShowPwd] = useState(false);
 
   useEffect(() => {
-    fetchProfile();
+    api.get('/admin/profile').then((r) => {
+      const d = r.data.data;
+      setForm(f => ({ ...f, name: d.name, email: d.email, phone: d.phone || '' }));
+    }).finally(() => setLoading(false));
   }, []);
 
-  const fetchProfile = async () => {
-    try {
-      const response = await api.get('/admin/profile');
-      setProfile(response.data.data);
-      setFormData({
-        name: response.data.data.name,
-        email: response.data.data.email,
-        phone: response.data.data.phone || '',
-        current_password: '',
-        new_password: '',
-        new_password_confirmation: ''
-      });
-    } catch (error) {
-      console.error('Erreur:', error);
-    } finally {
-      setLoading(false);
-    }
+  const notify = (type: 'success' | 'error', text: string) => {
+    setMsg({ type, text });
+    setTimeout(() => setMsg(null), 4000);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-
     try {
-      const response = await api.put('/admin/profile', formData);
-
-      if (response.status === 200) {
-        alert('Profil mis à jour avec succès !');
-        setProfile(response.data.data);
-        setFormData({
-          ...formData,
-          current_password: '',
-          new_password: '',
-          new_password_confirmation: ''
-        });
-        setShowPasswordFields(false);
-      }
-    } catch (error: any) {
-      alert(error.response?.data?.message || 'Erreur lors de la mise à jour');
-    } finally {
-      setSaving(false);
+      await api.put('/admin/profile', form);
+      notify('success', 'Profil mis à jour');
+      setForm(f => ({ ...f, current_password: '', new_password: '', new_password_confirmation: '' }));
+      setShowPwd(false);
+    } catch (e: any) {
+      notify('error', e.response?.data?.message || 'Erreur');
     }
+    setSaving(false);
   };
 
-  if (loading) {
-    return (
-      <div className="space-y-6">
-        <h1 className="text-3xl font-bold text-gray-900">Mon Profil</h1>
-        <div className="bg-white rounded-lg shadow p-6 animate-pulse">
-          <div className="space-y-4">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-4 bg-gray-200 rounded"></div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return (
+    <div className="flex items-center justify-center h-40">
+      <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold text-gray-900">Mon Profil</h1>
+    <div className="max-w-lg space-y-4">
+      {msg && (
+        <div className={`fixed top-4 right-4 z-50 px-4 py-2.5 rounded-lg text-sm font-medium shadow-lg ${
+          msg.type === 'success' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'
+        }`}>
+          {msg.text}
+        </div>
+      )}
 
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Nom complet
-              </label>
-              <input
-                type="text"
-                required
-                value={formData.name}
-                onChange={(e) => setFormData({...formData, name: e.target.value})}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center">
+          <Shield className="w-5 h-5 text-orange-600" />
+        </div>
+        <div>
+          <h1 className="text-xl font-bold text-gray-900">Mon profil</h1>
+          <p className="text-xs text-gray-400">Administrateur AMNAFI</p>
+        </div>
+      </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email
-              </label>
-              <input
-                type="email"
-                required
-                value={formData.email}
-                onChange={(e) => setFormData({...formData, email: e.target.value})}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Téléphone
-              </label>
-              <input
-                type="tel"
-                value={formData.phone}
-                onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Statut
-              </label>
-              <div className="px-3 py-2 bg-blue-50 text-blue-800 rounded-lg font-medium">
-                👑 Administrateur
+      <div className="bg-white rounded-xl border p-5">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            {[
+              { name: 'name', label: 'Nom complet', type: 'text' },
+              { name: 'email', label: 'Email', type: 'email' },
+              { name: 'phone', label: 'Téléphone', type: 'tel' },
+            ].map(({ name, label, type }) => (
+              <div key={name} className={name === 'email' ? 'col-span-2' : ''}>
+                <label className="block text-xs font-medium text-gray-600 mb-1">{label}</label>
+                <input
+                  type={type}
+                  value={(form as any)[name]}
+                  onChange={(e) => setForm({ ...form, [name]: e.target.value })}
+                  required={name !== 'phone'}
+                  className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                />
               </div>
-            </div>
+            ))}
           </div>
 
-          <div className="border-t pt-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-medium text-gray-900">Changer le mot de passe</h3>
-              <button
-                type="button"
-                onClick={() => setShowPasswordFields(!showPasswordFields)}
-                className="text-blue-600 hover:text-blue-800"
-              >
-                {showPasswordFields ? 'Annuler' : 'Modifier'}
-              </button>
-            </div>
+          <div className="border-t pt-4">
+            <button
+              type="button"
+              onClick={() => setShowPwd(!showPwd)}
+              className="text-sm text-orange-600 hover:underline"
+            >
+              {showPwd ? 'Annuler le changement de mot de passe' : 'Changer le mot de passe'}
+            </button>
 
-            {showPasswordFields && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Mot de passe actuel
-                  </label>
-                  <input
-                    type="password"
-                    value={formData.current_password}
-                    onChange={(e) => setFormData({...formData, current_password: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Nouveau mot de passe
-                  </label>
-                  <input
-                    type="password"
-                    value={formData.new_password}
-                    onChange={(e) => setFormData({...formData, new_password: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Confirmer le mot de passe
-                  </label>
-                  <input
-                    type="password"
-                    value={formData.new_password_confirmation}
-                    onChange={(e) => setFormData({...formData, new_password_confirmation: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
+            {showPwd && (
+              <div className="mt-3 space-y-3">
+                {[
+                  { name: 'current_password', label: 'Mot de passe actuel' },
+                  { name: 'new_password', label: 'Nouveau mot de passe' },
+                  { name: 'new_password_confirmation', label: 'Confirmer' },
+                ].map(({ name, label }) => (
+                  <div key={name}>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">{label}</label>
+                    <input
+                      type="password"
+                      value={(form as any)[name]}
+                      onChange={(e) => setForm({ ...form, [name]: e.target.value })}
+                      className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    />
+                  </div>
+                ))}
               </div>
             )}
           </div>
 
-          <div className="flex justify-end">
-            <button
-              type="submit"
-              disabled={saving}
-              className={`px-6 py-2 rounded-lg font-medium ${
-                saving
-                  ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-blue-600 hover:bg-blue-700'
-              } text-white transition-colors`}
-            >
-              {saving ? 'Enregistrement...' : 'Enregistrer les modifications'}
-            </button>
-          </div>
+          <button
+            type="submit"
+            disabled={saving}
+            className="w-full flex items-center justify-center gap-2 py-2.5 bg-orange-600 text-white rounded-lg text-sm font-medium hover:bg-orange-700 disabled:opacity-50 transition"
+          >
+            <Save className="w-4 h-4" />
+            {saving ? 'Enregistrement...' : 'Enregistrer'}
+          </button>
         </form>
       </div>
     </div>
