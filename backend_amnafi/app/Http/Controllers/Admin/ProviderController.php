@@ -25,15 +25,18 @@ class ProviderController extends Controller
             $search = $request->search;
             $query->where(function($q) use ($search) {
                 $q->where('business_name', 'like', "%{$search}%")
+                  ->orWhere('phone', 'like', "%{$search}%")
+                  ->orWhere('city', 'like', "%{$search}%")
                   ->orWhereHas('user', function($userQuery) use ($search) {
                       $userQuery->where('name', 'like', "%{$search}%")
-                               ->orWhere('email', 'like', "%{$search}%");
+                               ->orWhere('email', 'like', "%{$search}%")
+                               ->orWhere('phone', 'like', "%{$search}%");
                   });
             });
         }
         
         $providers = $query->orderBy('created_at', 'desc')
-                          ->paginate($request->get('per_page', 15));
+                          ->paginate($request->get('per_page', 100));
         
         return response()->json([
             'success' => true,
@@ -49,6 +52,18 @@ class ProviderController extends Controller
         return response()->json([
             'success' => true,
             'data' => $provider
+        ]);
+    }
+
+    public function toggleVerified(Request $request, $id)
+    {
+        $provider = Provider::findOrFail($id);
+        $provider->update(['is_verified' => !$provider->is_verified]);
+
+        return response()->json([
+            'success' => true,
+            'message' => $provider->is_verified ? 'Prestataire vérifié' : 'Vérification retirée',
+            'data' => ['is_verified' => $provider->is_verified]
         ]);
     }
 

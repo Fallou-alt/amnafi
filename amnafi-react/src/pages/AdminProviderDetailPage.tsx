@@ -31,7 +31,11 @@ export default function AdminProviderDetailPage() {
       const r = await api.get(`/admin/providers/${id}`);
       const d = r.data.data;
       setProvider(d);
-      setNote(d.admin_notes || '');
+      // admin_notes peut être un JSON array ou une string
+      try {
+        const parsed = typeof d.admin_notes === 'string' ? JSON.parse(d.admin_notes) : d.admin_notes;
+        setNote(Array.isArray(parsed) ? parsed.map((n: any) => n.note).join('\n') : (d.admin_notes || ''));
+      } catch { setNote(d.admin_notes || ''); }
       setEditForm({
         business_name: d.business_name || '',
         phone: d.phone || '',
@@ -119,6 +123,12 @@ export default function AdminProviderDetailPage() {
       action: () => provider.is_locked ? doAction('unlock') : setShowLock(true),
       icon: provider.is_locked ? Lock : Unlock,
       color: provider.is_locked ? 'text-red-600 bg-red-50 border-red-200' : 'text-gray-500 bg-gray-50 border-gray-200',
+    },
+    {
+      label: provider.is_verified ? 'Vérifié' : 'Non vérifié',
+      action: () => doAction('toggle-verified'),
+      icon: provider.is_verified ? Eye : EyeOff,
+      color: provider.is_verified ? 'text-blue-600 bg-blue-50 border-blue-200' : 'text-gray-400 bg-gray-50 border-gray-200',
     },
   ];
 

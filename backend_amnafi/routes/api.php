@@ -57,6 +57,7 @@ Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->group(function ()
     Route::get('/providers/{id}', [App\Http\Controllers\Admin\ProviderController::class, 'show']);
     Route::patch('/providers/{id}/toggle-status', [App\Http\Controllers\Admin\ProviderController::class, 'toggleStatus']);
     Route::patch('/providers/{id}/toggle-premium', [App\Http\Controllers\Admin\ProviderController::class, 'togglePremium']);
+    Route::patch('/providers/{id}/toggle-verified', [App\Http\Controllers\Admin\ProviderController::class, 'toggleVerified']);
     Route::patch('/providers/{id}/hide', [App\Http\Controllers\Admin\ProviderController::class, 'hide']);
     Route::patch('/providers/{id}/lock', [App\Http\Controllers\Admin\ProviderController::class, 'lock']);
     Route::patch('/providers/{id}/unlock', [App\Http\Controllers\Admin\ProviderController::class, 'unlock']);

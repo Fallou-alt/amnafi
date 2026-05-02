@@ -49,7 +49,9 @@ export default function AdminProvidersPage() {
       if (typeFilter !== 'all') params.type = typeFilter;
       const r = await api.get('/admin/providers', { params });
       const raw = r.data.data;
-      setProviders(Array.isArray(raw) ? raw : (raw?.data || []));
+      // Laravel paginate: { data: [...], total, ... } ou tableau direct
+      const list = Array.isArray(raw) ? raw : Array.isArray(raw?.data) ? raw.data : [];
+      setProviders(list);
     } catch {}
     setLoading(false);
   }, [search, statusFilter, typeFilter]);
