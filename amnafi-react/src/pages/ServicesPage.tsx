@@ -33,9 +33,9 @@ export default function ServicesPage() {
 
       <div className="max-w-3xl mx-auto px-4 py-6">
         {/* Bannière orange */}
-        <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-2xl p-5 mb-6 text-white">
+        <div className="bg-gradient-to-r from-blue-600 to-blue-500 rounded-2xl p-5 mb-6 text-white">
           <h2 className="font-bold text-lg">Tous nos métiers</h2>
-          <p className="text-orange-100 text-sm mt-0.5">Cliquez sur une catégorie pour voir les prestataires disponibles</p>
+          <p className="text-blue-100 text-sm mt-0.5">Cliquez sur une catégorie pour voir les prestataires disponibles</p>
         </div>
         {loading ? (
           <div className="flex justify-center py-20">
@@ -47,16 +47,16 @@ export default function ServicesPage() {
               <Link
                 key={cat.id}
                 to={`/prestataires?category_id=${cat.id}`}
-                className="bg-white rounded-xl border border-gray-100 hover:border-orange-300 hover:shadow-sm transition p-4 flex flex-col items-center text-center gap-2 group"
+                className="bg-white rounded-xl border border-gray-100 hover:border-blue-300 hover:shadow-sm transition p-4 flex flex-col items-center text-center gap-2 group"
               >
-                <div className="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center group-hover:bg-orange-100 transition">
+                <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center group-hover:bg-blue-100 transition">
                   <span className="text-2xl">{cat.icon}</span>
                 </div>
-                <p className="text-sm font-medium text-gray-800 group-hover:text-orange-600 transition leading-tight">
+                <p className="text-sm font-medium text-gray-800 group-hover:text-blue-600 transition leading-tight">
                   {cat.name}
                 </p>
                 {cat.providers_count > 0 && (
-                  <span className="flex items-center gap-1 text-xs text-orange-400 font-medium">
+                  <span className="flex items-center gap-1 text-xs text-blue-400 font-medium">
                     <Users className="w-3 h-3" /> {cat.providers_count} prestataire{cat.providers_count > 1 ? 's' : ''}
                   </span>
                 )}
