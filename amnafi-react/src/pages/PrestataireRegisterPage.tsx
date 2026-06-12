@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Camera, MapPin, Phone, Briefcase, Crown, CheckCircle, Upload, X } from 'lucide-react';
+import { Camera, MapPin, Phone, Mail, Briefcase, Crown, CheckCircle, Upload, X } from 'lucide-react';
 import api from '../lib/api';
 
 const VILLES_SENEGAL = [
@@ -16,6 +16,7 @@ export default function InscriptionPrestataire() {
     nom: '',
     prenom: '',
     telephone: '',
+    email: '',
     business_name: '',
     category_id: '',
     ville: '',
@@ -94,6 +95,7 @@ export default function InscriptionPrestataire() {
       formDataToSend.append('first_name', formData.prenom.trim());
       formDataToSend.append('last_name', formData.nom.trim());
       formDataToSend.append('phone', formData.telephone.trim());
+      if (formData.email.trim()) formDataToSend.append('email', formData.email.trim());
       formDataToSend.append('business_name', formData.business_name.trim());
       formDataToSend.append('profession', formData.business_name.trim());
       formDataToSend.append('category_id', formData.category_id);
@@ -167,18 +169,15 @@ export default function InscriptionPrestataire() {
       <div className="max-w-3xl mx-auto px-4 py-8">
         {/* Bannière marketing */}
         <div className="bg-gradient-to-r from-orange-600 to-orange-500 rounded-2xl p-5 mb-6 text-white">
-          <div className="flex items-start gap-3">
-            <span className="text-3xl">🏦</span>
-            <div>
-              <h2 className="font-bold text-lg leading-tight">Opportunité unique au Sénégal</h2>
-              <p className="text-orange-100 text-sm mt-1">
-                Nos partenaires <strong className="text-white">banques et assurances</strong> recrutent activement des <strong className="text-white">commerciaux terrain</strong> et <strong className="text-white">conseillers clientèle</strong>. Créez votre profil gratuitement et soyez visible auprès des meilleurs employeurs du secteur financier.
-              </p>
-              <div className="flex flex-wrap gap-2 mt-3">
-                {['✅ Inscription gratuite', '📞 Contact direct', '🏆 Partenaires certifiés', '📍 Partout au Sénégal'].map(tag => (
-                  <span key={tag} className="bg-white/20 text-white text-xs px-2.5 py-1 rounded-full font-medium">{tag}</span>
-                ))}
-              </div>
+          <div className="text-center">
+            <p className="font-bold text-base leading-tight mb-1">🚨🎓 1 000 OPPORTUNITÉS POUR LES ÉTUDIANTS ET JEUNES DIPLÔMÉS SÉNÉGALAIS ! 🇸🇳</p>
+            <p className="text-orange-100 text-sm mt-1 mb-3">
+              AMNAFI, en collaboration avec plusieurs entreprises partenaires dont <strong className="text-white">NSIA Assurances</strong>, lance une vaste campagne de recrutement : stages, jobs étudiants, emplois à temps partiel ou plein dans les secteurs Commerce, Marketing, Assurance, Informatique, Service Client, Administration, Logistique, Hôtellerie et bien d'autres.
+            </p>
+            <div className="flex flex-wrap justify-center gap-2 text-xs">
+              {['✅ Inscription gratuite', '✅ Toutes universités & écoles du Sénégal', '✅ Accompagnement professionnel', '⚠️ Places limitées – clôture le 31 juillet 2026'].map(tag => (
+                <span key={tag} className="bg-white/20 text-white px-2.5 py-1 rounded-full font-medium">{tag}</span>
+              ))}
             </div>
           </div>
         </div>
@@ -279,6 +278,20 @@ export default function InscriptionPrestataire() {
                 placeholder="+221 XX XXX XX XX"
                 value={formData.telephone}
                 onChange={(e) => setFormData({...formData, telephone: e.target.value})}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                <Mail className="inline w-4 h-4 mr-1" />
+                Email
+              </label>
+              <input
+                type="email"
+                placeholder="exemple@email.com"
+                value={formData.email}
+                onChange={(e) => setFormData({...formData, email: e.target.value})}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>

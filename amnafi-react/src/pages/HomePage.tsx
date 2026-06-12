@@ -157,21 +157,20 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Bannière partenariat banques/assurances */}
+      {/* Bannière opportunités étudiants */}
       <section className="bg-gradient-to-r from-orange-600 to-orange-500 py-10">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="text-white text-center md:text-left">
-              <div className="inline-flex items-center gap-2 bg-white/20 rounded-full px-3 py-1 text-sm font-medium mb-3">
-                🏦 Partenariat Banques & Assurances
-              </div>
-              <h2 className="text-2xl md:text-3xl font-bold mb-2">
-                Vous cherchez un emploi dans la finance ?<br />
-                <span className="text-orange-200">AMNAFI recrute pour vous.</span>
-              </h2>
-              <p className="text-orange-100 text-sm md:text-base max-w-xl">
-                Nos partenaires banques et compagnies d'assurance recrutent des <strong className="text-white">commerciaux terrain</strong> et <strong className="text-white">conseillers clientèle</strong> partout au Sénégal. Inscrivez-vous gratuitement et soyez contacté directement.
+              <p className="font-bold text-xl md:text-2xl mb-2">🚨🎓 1 000 OPPORTUNITÉS POUR LES ÉTUDIANTS ET JEUNES DIPLÔMÉS SÉNÉGALAIS ! 🇸🇳</p>
+              <p className="text-orange-100 text-sm md:text-base max-w-2xl">
+                AMNAFI, en collaboration avec plusieurs entreprises partenaires dont <strong className="text-white">NSIA Assurances</strong>, lance une campagne de recrutement : stages, jobs étudiants, emplois à temps partiel ou plein dans les secteurs Commerce, Marketing, Assurance, Informatique, Service Client, Administration, Logistique, Hôtellerie et bien d'autres.
               </p>
+              <div className="flex flex-wrap gap-2 mt-3">
+                {['✅ Inscription gratuite', '✅ Toutes universités & écoles du Sénégal', '✅ Accompagnement professionnel', '⚠️ Clôture le 31 juillet 2026'].map(tag => (
+                  <span key={tag} className="bg-white/20 text-white text-xs px-2.5 py-1 rounded-full font-medium">{tag}</span>
+                ))}
+              </div>
             </div>
             <div className="shrink-0">
               <Link to="/prestataire"
