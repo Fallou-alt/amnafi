@@ -47,6 +47,8 @@ export default function ProviderPublicPage() {
   const coverUrl = provider.cover_photo_url ||
     (provider.cover_photo ? `https://amnafi.net/backend/public/storage/${provider.cover_photo}` : null);
   const phone = provider.phone || provider.user?.phone || '';
+  const isStudent = provider.is_student && provider.phone_hidden;
+  const maskedPhone = phone ? phone.slice(0, -2) + '••' : '';
   const whatsapp = `https://wa.me/${phone.replace(/[^0-9]/g, '')}`;
 
   return (
@@ -117,7 +119,9 @@ export default function ProviderPublicPage() {
               {phone && (
                 <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 rounded-xl px-3 py-2.5">
                   <Phone className="w-4 h-4 text-orange-400 shrink-0" />
-                  <span>{phone}</span>
+                  <span className={isStudent ? 'select-none tracking-wider' : ''}>
+                    {isStudent ? maskedPhone : phone}
+                  </span>
                 </div>
               )}
               {provider.user?.name && (
@@ -144,14 +148,22 @@ export default function ProviderPublicPage() {
             {/* Boutons contact */}
             {phone && (
               <div className="flex gap-3">
-                <a href={`tel:${phone}`}
-                  className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-orange-600 text-white rounded-xl font-semibold hover:bg-orange-700 transition text-sm">
-                  <Phone className="w-4 h-4" /> Appeler
-                </a>
-                <a href={whatsapp} target="_blank" rel="noopener noreferrer"
-                  className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 transition text-sm">
-                  <MessageCircle className="w-4 h-4" /> WhatsApp
-                </a>
+                {isStudent ? (
+                  <div className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-gray-200 text-gray-400 rounded-xl font-semibold text-sm cursor-not-allowed select-none">
+                    <Phone className="w-4 h-4" /> Contact via AMNAFI
+                  </div>
+                ) : (
+                  <>
+                    <a href={`tel:${phone}`}
+                      className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-orange-600 text-white rounded-xl font-semibold hover:bg-orange-700 transition text-sm">
+                      <Phone className="w-4 h-4" /> Appeler
+                    </a>
+                    <a href={whatsapp} target="_blank" rel="noopener noreferrer"
+                      className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 transition text-sm">
+                      <MessageCircle className="w-4 h-4" /> WhatsApp
+                    </a>
+                  </>
+                )}
               </div>
             )}
           </div>

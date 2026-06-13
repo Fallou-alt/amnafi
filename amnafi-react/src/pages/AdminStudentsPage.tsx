@@ -56,7 +56,13 @@ export default function AdminStudentsPage() {
 
   const maskedPhone = (phone: string) => {
     if (!phone) return '—';
-    return phone.slice(0, 4) + '••••' + phone.slice(-2);
+    return phone.slice(0, -2) + '••';
+  };
+
+  const maskedEmail = (email: string) => {
+    if (!email || email.includes('@amnafi.local')) return '—';
+    const [local, domain] = email.split('@');
+    return local.slice(0, 2) + '•••@' + domain;
   };
 
   return (
@@ -112,18 +118,20 @@ export default function AdminStudentsPage() {
                   <td className="px-4 py-3 font-medium text-gray-900">{s.user?.name || s.business_name}</td>
                   <td className="px-4 py-3 text-gray-600">{s.category?.name || '—'}</td>
                   <td className="px-4 py-3 text-gray-600">{s.city || '—'}</td>
-                  <td className="px-4 py-3 text-gray-600 max-w-[160px] truncate">{s.email || '—'}</td>
+                  <td className="px-4 py-3 text-gray-600 max-w-[160px] truncate">
+                    <span className="font-mono text-xs text-gray-400 select-none">{maskedEmail(s.email)}</span>
+                  </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
-                      <span className={`font-mono text-xs ${s.phone_hidden && !revealedIds.has(s.id) ? 'text-gray-400' : 'text-gray-900'}`}>
-                        {s.phone_hidden && !revealedIds.has(s.id) ? maskedPhone(s.phone) : (s.phone || '—')}
+                      <span className="font-mono text-xs text-gray-400 select-none" style={{userSelect:'none'}}>
+                        {maskedPhone(s.phone)}
                       </span>
                       {s.phone_hidden && !revealedIds.has(s.id) ? (
-                        <button onClick={() => revealPhone(s.id)} title="Démasquer" className="text-blue-500 hover:text-blue-700">
+                        <button onClick={() => revealPhone(s.id)} title="Démasquer (admin uniquement)" className="text-blue-500 hover:text-blue-700">
                           <Eye className="w-4 h-4" />
                         </button>
                       ) : (
-                        <EyeOff className="w-4 h-4 text-gray-300" />
+                        <span className="font-mono text-xs text-gray-700 select-none">{s.phone}</span>
                       )}
                     </div>
                   </td>
