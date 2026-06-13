@@ -34,7 +34,8 @@ class ProviderRegistrationController extends Controller
             'city' => 'required|string|max:100',
             'description' => 'nullable|string|max:1000',
             'profile_photo' => 'required|file|mimes:jpeg,png,jpg,gif,webp|max:10240',
-            'subscription_type' => 'required|in:free,simple,premium'
+            'subscription_type' => 'required|in:free,simple,premium',
+            'is_student' => 'nullable|boolean'
         ]);
 
         $categoryId = $request->category_id;
@@ -90,6 +91,8 @@ class ProviderRegistrationController extends Controller
             'category_id' => $categoryId,
             'is_active' => true,
             'is_verified' => false,
+            'is_student' => (bool) $request->is_student,
+            'phone_hidden' => true,
             'rating' => 0.0,
             'reviews_count' => 0,
             'services_count' => 0,

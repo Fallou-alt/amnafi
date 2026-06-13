@@ -22,7 +22,8 @@ export default function InscriptionPrestataire() {
     ville: '',
     quartier: '',
     photo: null as File | null,
-    statut: 'gratuit'
+    statut: 'gratuit',
+    is_student: false
   });
   
   const [categories, setCategories] = useState<any[]>([]);
@@ -96,6 +97,7 @@ export default function InscriptionPrestataire() {
       formDataToSend.append('last_name', formData.nom.trim());
       formDataToSend.append('phone', formData.telephone.trim());
       if (formData.email.trim()) formDataToSend.append('email', formData.email.trim());
+      formDataToSend.append('is_student', formData.is_student ? '1' : '0');
       formDataToSend.append('business_name', formData.business_name.trim());
       formDataToSend.append('profession', formData.business_name.trim());
       formDataToSend.append('category_id', formData.category_id);
@@ -294,6 +296,20 @@ export default function InscriptionPrestataire() {
                 onChange={(e) => setFormData({...formData, email: e.target.value})}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
+            </div>
+
+            <div className="flex items-center gap-3 bg-blue-50 border border-blue-200 rounded-xl p-4">
+              <input
+                type="checkbox"
+                id="is_student"
+                checked={formData.is_student}
+                onChange={(e) => setFormData({...formData, is_student: e.target.checked})}
+                className="w-5 h-5 text-blue-600 rounded cursor-pointer"
+              />
+              <label htmlFor="is_student" className="text-sm text-blue-800 cursor-pointer">
+                <span className="font-semibold">🎓 Je suis étudiant(e) ou jeune diplômé(e)</span>
+                <span className="block text-xs text-blue-600 mt-0.5">Votre numéro sera masqué par défaut pour votre sécurité</span>
+              </label>
             </div>
 
             <div>

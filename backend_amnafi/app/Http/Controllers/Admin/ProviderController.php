@@ -212,6 +212,51 @@ class ProviderController extends Controller
         ]);
     }
 
+    public function revealPhone(Request $request, $id)
+    {
+        $provider = Provider::findOrFail($id);
+        $provider->update(['phone_hidden' => false]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Numéro démasqué',
+            'data' => ['phone' => $provider->phone, 'phone_hidden' => false]
+        ]);
+    }
+
+    public function exportStudents()
+    {
+        $students = Provider::with(['user', 'category'])
+            ->where('is_student', true)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $rows = [];
+        $rows[] = implode(';', ['ID', 'Prénom', 'Nom', 'Téléphone', 'Email', 'Ville', 'Catégorie', 'Statut', 'Date inscription']);
+
+        foreach ($students as $p) {
+            $nameParts = explode(' ', $p->user->name ?? '', 2);
+            $rows[] = implode(';', [
+                $p->id,
+                $nameParts[0] ?? '',
+                $nameParts[1] ?? '',
+                $p->phone ?? '',
+                $p->email ?? $p->user->email ?? '',
+                $p->city ?? '',
+                $p->category->name ?? '',
+                $p->is_active ? 'Actif' : 'Inactif',
+                $p->created_at->format('d/m/Y H:i'),
+            ]);
+        }
+
+        $csv = implode("\n", $rows);
+
+        return response($csv, 200, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="etudiants_amnafi_' . now()->format('Ymd') . '.csv"',
+        ]);
+    }
+
     public function destroy($id)
     {
         $provider = Provider::findOrFail($id);
