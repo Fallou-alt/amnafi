@@ -258,7 +258,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
             <motion.div initial={{ opacity: 0, scale: 0.5 }} whileInView={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5 }}>
-              <div className="text-4xl font-bold text-blue-600 mb-2">1000+</div>
+              <div className="text-4xl font-bold text-blue-600 mb-2">500+</div>
               <div className="text-gray-600">Prestataires</div>
             </motion.div>
             <motion.div initial={{ opacity: 0, scale: 0.5 }} whileInView={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5, delay: 0.1 }}>
