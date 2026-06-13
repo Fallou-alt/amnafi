@@ -224,6 +224,18 @@ class ProviderController extends Controller
         ]);
     }
 
+    public function hidePhone(Request $request, $id)
+    {
+        $provider = Provider::findOrFail($id);
+        $provider->update(['phone_hidden' => true]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Numéro remasqué',
+            'data' => ['phone_hidden' => true]
+        ]);
+    }
+
     public function exportStudents()
     {
         $students = Provider::with(['user', 'category'])

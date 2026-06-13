@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Download, Eye, Search, GraduationCap } from 'lucide-react';
+import { Download, Eye, EyeOff, Search, GraduationCap } from 'lucide-react';
 import api from '../lib/api';
 
 interface Student {
@@ -20,7 +20,8 @@ export default function AdminStudentsPage() {
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [revealedIds, setRevealedIds] = useState<Set<number>>(new Set());
+  const [revealedPhones, setRevealedPhones] = useState<Set<number>>(new Set());
+  const [revealedEmails, setRevealedEmails] = useState<Set<number>>(new Set());
 
   const fetchStudents = async () => {
     setLoading(true);
@@ -35,14 +36,28 @@ export default function AdminStudentsPage() {
 
   useEffect(() => { fetchStudents(); }, []);
 
-  const revealPhone = async (id: number) => {
+  const togglePhone = async (id: number, hide: boolean) => {
     try {
-      const res = await api.patch(`/admin/providers/${id}/reveal-phone`);
+      const route = hide ? `/admin/providers/${id}/hide-phone` : `/admin/providers/${id}/reveal-phone`;
+      const res = await api.patch(route);
       if (res.data.success) {
-        setRevealedIds(prev => new Set(prev).add(id));
-        setStudents(prev => prev.map(s => s.id === id ? { ...s, phone_hidden: false, phone: res.data.data.phone } : s));
+        if (hide) {
+          setRevealedPhones(prev => { const s = new Set(prev); s.delete(id); return s; });
+          setStudents(prev => prev.map(s => s.id === id ? { ...s, phone_hidden: true } : s));
+        } else {
+          setRevealedPhones(prev => new Set(prev).add(id));
+          setStudents(prev => prev.map(s => s.id === id ? { ...s, phone_hidden: false, phone: res.data.data.phone } : s));
+        }
       }
     } catch {}
+  };
+
+  const toggleEmail = (id: number) => {
+    setRevealedEmails(prev => {
+      const s = new Set(prev);
+      s.has(id) ? s.delete(id) : s.add(id);
+      return s;
+    });
   };
 
   const exportCSV = () => {
@@ -119,20 +134,25 @@ export default function AdminStudentsPage() {
                   <td className="px-4 py-3 text-gray-600">{s.category?.name || '—'}</td>
                   <td className="px-4 py-3 text-gray-600">{s.city || '—'}</td>
                   <td className="px-4 py-3 text-gray-600 max-w-[160px] truncate">
-                    <span className="font-mono text-xs text-gray-400 select-none">{maskedEmail(s.email)}</span>
+                    <div className="flex items-center gap-1">
+                      <span className="font-mono text-xs select-none">
+                        {revealedEmails.has(s.id) ? (s.email?.includes('@amnafi.local') ? '—' : s.email) : maskedEmail(s.email)}
+                      </span>
+                      {!s.email?.includes('@amnafi.local') && (
+                        <button onClick={() => toggleEmail(s.id)} title={revealedEmails.has(s.id) ? 'Masquer' : 'Démasquer'} className="text-blue-400 hover:text-blue-600 flex-shrink-0">
+                          {revealedEmails.has(s.id) ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                        </button>
+                      )}
+                    </div>
                   </td>
                   <td className="px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono text-xs text-gray-400 select-none" style={{userSelect:'none'}}>
-                        {maskedPhone(s.phone)}
+                    <div className="flex items-center gap-1">
+                      <span className="font-mono text-xs select-none">
+                        {revealedPhones.has(s.id) ? s.phone : maskedPhone(s.phone)}
                       </span>
-                      {s.phone_hidden && !revealedIds.has(s.id) ? (
-                        <button onClick={() => revealPhone(s.id)} title="Démasquer (admin uniquement)" className="text-blue-500 hover:text-blue-700">
-                          <Eye className="w-4 h-4" />
-                        </button>
-                      ) : (
-                        <span className="font-mono text-xs text-gray-700 select-none">{s.phone}</span>
-                      )}
+                      <button onClick={() => togglePhone(s.id, revealedPhones.has(s.id))} title={revealedPhones.has(s.id) ? 'Remasquer' : 'Démasquer'} className="text-blue-400 hover:text-blue-600 flex-shrink-0">
+                        {revealedPhones.has(s.id) ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                      </button>
                     </div>
                   </td>
                   <td className="px-4 py-3">

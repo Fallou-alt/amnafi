@@ -62,6 +62,7 @@ Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->group(function ()
     Route::patch('/providers/{id}/lock', [App\Http\Controllers\Admin\ProviderController::class, 'lock']);
     Route::patch('/providers/{id}/unlock', [App\Http\Controllers\Admin\ProviderController::class, 'unlock']);
     Route::patch('/providers/{id}/reveal-phone', [App\Http\Controllers\Admin\ProviderController::class, 'revealPhone']);
+    Route::patch('/providers/{id}/hide-phone', [App\Http\Controllers\Admin\ProviderController::class, 'hidePhone']);
     Route::get('/students/export', [App\Http\Controllers\Admin\ProviderController::class, 'exportStudents']);
     Route::post('/providers/{id}/note', [App\Http\Controllers\Admin\ProviderController::class, 'addNote']);
     Route::put('/providers/{id}', [App\Http\Controllers\Admin\ProviderController::class, 'update']);
