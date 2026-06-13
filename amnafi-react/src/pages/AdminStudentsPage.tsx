@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Download, Eye, EyeOff, Search, GraduationCap } from 'lucide-react';
+import { Download, Eye, Search, GraduationCap } from 'lucide-react';
 import api from '../lib/api';
 
 interface Student {
