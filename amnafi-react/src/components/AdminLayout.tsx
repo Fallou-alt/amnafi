@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Users, BarChart2, Settings, LogOut,
-  Medal, ClipboardList, Menu, X, Shield, GraduationCap
+  GraduationCap, Shield, Menu, X, Bell, MessageSquare
 } from 'lucide-react';
 import api from '../lib/api';
 
@@ -11,8 +11,8 @@ const nav = [
   { path: '/admin/prestataires', icon: Users, label: 'Prestataires' },
   { path: '/admin/etudiants', icon: GraduationCap, label: 'Étudiants' },
   { path: '/admin/statistiques', icon: BarChart2, label: 'Statistiques' },
-  { path: '/joj/admin/providers', icon: Medal, label: 'Prestataires Officiels' },
-  { path: '/joj/admin/missions', icon: ClipboardList, label: 'Missions' },
+  { path: '/admin/messages', icon: MessageSquare, label: 'Messages' },
+  { path: '/admin/notifications', icon: Bell, label: 'Notifications' },
   { path: '/admin/profil', icon: Settings, label: 'Mon profil' },
 ];
 

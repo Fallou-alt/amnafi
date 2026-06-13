@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Users, Crown, UserCheck, UserX, TrendingUp, RefreshCw } from 'lucide-react';
+import { Users, Crown, UserCheck, UserX, TrendingUp, RefreshCw, GraduationCap } from 'lucide-react';
 import api from '../lib/api';
 
 export default function AdminDashboard() {
@@ -24,13 +24,16 @@ export default function AdminDashboard() {
     { label: 'Inactifs', value: stats.inactive_providers, icon: UserX, color: 'text-red-500', bg: 'bg-red-50' },
     { label: 'Premium', value: stats.premium_providers, icon: Crown, color: 'text-yellow-600', bg: 'bg-yellow-50' },
     { label: "Aujourd'hui", value: stats.today_registrations, icon: TrendingUp, color: 'text-purple-600', bg: 'bg-purple-50' },
+    { label: 'Étudiants', value: stats.student_providers ?? '—', icon: GraduationCap, color: 'text-indigo-600', bg: 'bg-indigo-50' },
   ] : [];
 
   const quickLinks = [
     { to: '/admin/prestataires', label: 'Gérer les prestataires', sub: 'Activer, modifier, supprimer' },
+    { to: '/admin/etudiants', label: 'Étudiants & Diplômés', sub: 'Base candidats + export CSV' },
     { to: '/admin/statistiques', label: 'Statistiques', sub: 'Inscriptions et croissance' },
-    { to: '/joj/admin/providers', label: 'Prestataires officiels', sub: 'Gérer les profils JOJ' },
-    { to: '/joj/admin/missions', label: 'Missions', sub: 'Valider et assigner' },
+    { to: '/admin/messages', label: 'Messages', sub: 'Contacter les prestataires' },
+    { to: '/admin/notifications', label: 'Notifications', sub: 'Alertes et annonces' },
+    { to: '/admin/profil', label: 'Mon profil', sub: 'Paramètres du compte admin' },
   ];
 
   return (
@@ -43,7 +46,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         {loading
           ? [...Array(5)].map((_, i) => <div key={i} className="bg-white rounded-xl border h-20 animate-pulse" />)
           : cards.map(({ label, value, icon: Icon, color, bg }) => (

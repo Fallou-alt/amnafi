@@ -26,6 +26,7 @@ export default function AdminLoginPage() {
 
       localStorage.setItem('admin_token', token);
       localStorage.setItem('admin_user', JSON.stringify(user));
+      localStorage.setItem('admin_login_time', Date.now().toString());
       localStorage.setItem('token', token);
       navigate('/admin/dashboard');
     } catch (err: any) {

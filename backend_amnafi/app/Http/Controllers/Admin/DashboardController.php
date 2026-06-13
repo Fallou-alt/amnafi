@@ -18,6 +18,7 @@ class DashboardController extends Controller
         $premiumProviders = Provider::where('is_premium', true)->count();
         
         $todayRegistrations = Provider::whereDate('created_at', Carbon::today())->count();
+        $studentProviders = Provider::where('is_student', true)->count();
         
         // Revenus estimés (premium * 29.99€)
         $estimatedRevenue = $premiumProviders * 29.99;
@@ -30,6 +31,7 @@ class DashboardController extends Controller
                 'inactive_providers' => $inactiveProviders,
                 'premium_providers' => $premiumProviders,
                 'today_registrations' => $todayRegistrations,
+                'student_providers' => $studentProviders,
                 'estimated_revenue' => $estimatedRevenue
             ]
         ]);
