@@ -173,8 +173,8 @@ export default function AllProviders() {
                       <div className="flex items-center gap-1.5 text-xs text-gray-500">
                         <Phone className="w-3.5 h-3.5 shrink-0" />
                         {provider.phone_hidden
-                          ? <span className="select-none">{provider.phone?.slice(0, -2)}••</span>
-                          : provider.phone}
+                          ? <span className="select-none">{provider.phone ? provider.phone.slice(0, -2) + '••' : '—'}</span>
+                          : (provider.phone || '—')}
                       </div>
                     </div>
                     <div className="flex items-center justify-between pt-3 border-t border-gray-50">
@@ -184,14 +184,14 @@ export default function AllProviders() {
                         <span className="text-gray-400">({provider.reviews_count})</span>
                       </div>
                       <div className="flex gap-2">
-                        {!provider.phone_hidden && (
+                          {!provider.phone_hidden && provider.phone && (
                           <a href={`tel:${provider.phone}`}
                             onClick={(e) => e.stopPropagation()}
                             className="p-2 bg-orange-50 text-orange-600 rounded-lg hover:bg-orange-100 transition" title="Appeler">
                             <Phone className="w-4 h-4" />
                           </a>
                         )}
-                        {!provider.phone_hidden && (
+                        {!provider.phone_hidden && provider.whatsapp_url && (
                           <a href={provider.whatsapp_url} target="_blank" rel="noopener noreferrer"
                             onClick={(e) => e.stopPropagation()}
                             className="p-2 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition" title="WhatsApp">
