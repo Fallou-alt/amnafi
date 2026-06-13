@@ -394,7 +394,7 @@ export default function InscriptionPrestataire() {
                     </div>
                     {formData.statut === 'gratuit' && <CheckCircle className="w-5 h-5 text-green-500" />}
                   </div>
-                  <p className="text-sm text-gray-600 mb-2">30 jours d'essai</p>
+                  <p className="text-sm text-gray-600 mb-2">3 mois d'essai</p>
                   <ul className="text-xs text-gray-500 space-y-1">
                     <li>• Profil de base</li>
                     <li>• Contact direct</li>

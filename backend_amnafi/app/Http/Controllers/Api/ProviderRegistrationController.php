@@ -106,8 +106,8 @@ class ProviderRegistrationController extends Controller
             // Abonnement gratuit - 30 jours d'essai
             $provider->update([
                 'subscription_started_at' => now(),
-                'trial_ends_at' => now()->addDays(30),
-                'subscription_expires_at' => now()->addDays(30),
+                'trial_ends_at' => now()->addDays(90),
+                'subscription_expires_at' => now()->addDays(90),
                 'auto_renew' => false,
             ]);
             
@@ -121,7 +121,7 @@ class ProviderRegistrationController extends Controller
                     'requires_payment' => false,
                     'subscription_info' => [
                         'type' => 'free',
-                        'trial_days' => 30,
+                        'trial_days' => 90,
                         'expires_at' => $provider->subscription_expires_at,
                     ]
                 ]
