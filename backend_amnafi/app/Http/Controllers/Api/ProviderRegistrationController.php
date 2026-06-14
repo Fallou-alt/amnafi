@@ -293,8 +293,8 @@ class ProviderRegistrationController extends Controller
             'success' => true,
             'message' => 'Photos mises à jour',
             'data' => [
-                'profile_photo_url' => isset($updates['profile_photo']) ? Storage::url($updates['profile_photo']) : null,
-                'cover_photo_url' => isset($updates['cover_photo']) ? Storage::url($updates['cover_photo']) : null
+                'profile_photo_url' => isset($updates['profile_photo']) ? 'https://amnafi.net/backend/public/storage/' . $updates['profile_photo'] : null,
+                'cover_photo_url' => isset($updates['cover_photo']) ? 'https://amnafi.net/backend/public/storage/' . $updates['cover_photo'] : null
             ]
         ]);
     }
@@ -414,8 +414,8 @@ class ProviderRegistrationController extends Controller
         }
         
         $provider->load('category');
-        $provider->profile_photo_url = $provider->profile_photo ? url('backend/public/storage/' . $provider->profile_photo) : null;
-        $provider->cover_photo_url = $provider->cover_photo ? url('backend/public/storage/' . $provider->cover_photo) : null;
+        $provider->profile_photo_url = $provider->profile_photo ? 'https://amnafi.net/backend/public/storage/' . $provider->profile_photo : null;
+        $provider->cover_photo_url = $provider->cover_photo ? 'https://amnafi.net/backend/public/storage/' . $provider->cover_photo : null;
 
         return response()->json([
             'success' => true,
