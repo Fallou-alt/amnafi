@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Provider;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class ProviderController extends Controller
 {
@@ -59,6 +60,7 @@ class ProviderController extends Controller
     {
         $provider = Provider::findOrFail($id);
         $provider->update(['is_verified' => !$provider->is_verified]);
+        Cache::flush();
 
         return response()->json([
             'success' => true,
@@ -71,7 +73,8 @@ class ProviderController extends Controller
     {
         $provider = Provider::findOrFail($id);
         $provider->update(['is_active' => !$provider->is_active]);
-        
+        Cache::flush();
+
         return response()->json([
             'success' => true,
             'message' => $provider->is_active ? 'Prestataire activé' : 'Prestataire désactivé',
@@ -93,7 +96,8 @@ class ProviderController extends Controller
             $provider->activatePremiumSubscription(365); // 1 an
             $message = 'Prestataire passé en premium';
         }
-        
+        Cache::flush();
+
         return response()->json([
             'success' => true,
             'message' => $message,
@@ -108,7 +112,8 @@ class ProviderController extends Controller
     {
         $provider = Provider::findOrFail($id);
         $provider->update(['is_hidden' => !$provider->is_hidden]);
-        
+        Cache::flush();
+
         return response()->json([
             'success' => true,
             'message' => $provider->is_hidden ? 'Prestataire masqué' : 'Prestataire visible',
@@ -198,7 +203,8 @@ class ProviderController extends Controller
         ]);
         
         $provider->update($validated);
-        
+        Cache::flush();
+
         // Reset mot de passe = numéro de téléphone
         if ($request->has('reset_password') && $request->reset_password) {
             $phone = preg_replace('/[^0-9]/', '', $provider->phone);
@@ -273,7 +279,8 @@ class ProviderController extends Controller
     {
         $provider = Provider::findOrFail($id);
         $provider->delete();
-        
+        Cache::flush();
+
         return response()->json([
             'success' => true,
             'message' => 'Prestataire supprimé'
