@@ -218,6 +218,18 @@ class ProviderController extends Controller
         ]);
     }
 
+    public function toggleEmailHidden(Request $request, $id)
+    {
+        $provider = Provider::findOrFail($id);
+        $provider->update(['email_hidden' => !$provider->email_hidden]);
+
+        return response()->json([
+            'success' => true,
+            'message' => $provider->email_hidden ? 'Email masqué' : 'Email visible',
+            'data' => ['email_hidden' => $provider->email_hidden]
+        ]);
+    }
+
     public function revealPhone(Request $request, $id)
     {
         $provider = Provider::findOrFail($id);

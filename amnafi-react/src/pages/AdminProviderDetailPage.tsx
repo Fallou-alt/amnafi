@@ -210,7 +210,18 @@ export default function AdminProviderDetailPage() {
           </div>
           <div>
             <p className="text-xs text-gray-400">Email</p>
-            <p className="font-medium text-gray-800 truncate">{provider.user?.email}</p>
+            <div className="flex items-center gap-2">
+              <p className="font-medium text-gray-800 truncate">
+                {provider.email_hidden ? '••••••••@••••.••' : (provider.email || provider.user?.email)}
+              </p>
+              <button
+                onClick={() => doAction('toggle-email-hidden')}
+                title={provider.email_hidden ? 'Démasquer l\'email' : 'Masquer l\'email'}
+                className="text-gray-400 hover:text-orange-600 transition shrink-0"
+              >
+                {provider.email_hidden ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
           </div>
           <div>
             <p className="text-xs text-gray-400">Téléphone utilisateur</p>
